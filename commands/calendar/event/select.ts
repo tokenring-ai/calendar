@@ -1,0 +1,48 @@
+import Agent from "@tokenring-ai/agent/Agent";
+import type {TreeLeaf} from "@tokenring-ai/agent/question";
+import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
+import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import CalendarService from "../../../CalendarService.ts";
+
+async function execute(_remainder: string, agent: Agent): Promise<string> {
+  const calendarService = agent.requireServiceByType(CalendarService);
+
+  try {
+    const events = await calendarService.getUpcomingEvents({limit: 25}, agent);
+    if (!events?.length) return "No events found.";
+
+    const tree: TreeLeaf[] = events.map(event => ({
+      name: `${event.title} (${new Date(event.startAt).toLocaleString()})`,
+      value: event.id,
+    }));
+
+    const selection = await agent.askQuestion({
+      message: "Choose a calendar event to inspect",
+      question: {
+        type: "treeSelect",
+        label: "Calendar Event Selection",
+        key: "result",
+        minimumSelections: 1,
+        maximumSelections: 1,
+        tree,
+      },
+    });
+
+    if (!selection) return "Event selection cancelled.";
+
+    const event = await calendarService.selectEventById(selection[0], agent);
+    return `Selected event: "${event.title}"`;
+  } catch (error) {
+    throw new CommandFailedError(`Error during event selection: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+const help = `# /calendar event select
+
+Interactively select an upcoming event.
+
+## Example
+
+/calendar event select`;
+
+export default {name: "calendar event select", description: "/calendar event select - Select an event", help, execute} satisfies TokenRingAgentCommand;
