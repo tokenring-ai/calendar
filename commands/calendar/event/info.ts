@@ -1,9 +1,13 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 import {CalendarState} from "../../../state/CalendarState.ts";
 
-async function execute(_remainder: string, agent: Agent): Promise<string> {
+const inputSchema = {
+  args: {},
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const calendarService = agent.requireServiceByType(CalendarService);
   const currentEvent = calendarService.getCurrentEvent(agent);
   if (!currentEvent) return "No calendar event is currently selected.\nUse /calendar event select to choose an event.";
@@ -31,4 +35,4 @@ Display information about the currently selected event.
 
 /calendar event info`;
 
-export default {name: "calendar event info", description: "Show event details", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event info", description: "Show event details", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;

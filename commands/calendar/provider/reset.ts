@@ -1,10 +1,14 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 import {CalendarState} from "../../../state/CalendarState.ts";
 
-async function execute(_remainder: string, agent: Agent): Promise<string> {
+const inputSchema = {
+  args: {},
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const initialProvider = agent.getState(CalendarState).initialConfig.provider;
   if (!initialProvider) throw new CommandFailedError("No initial provider configured");
   agent.requireServiceByType(CalendarService).setActiveProvider(initialProvider, agent);
@@ -19,4 +23,4 @@ Reset the active calendar provider to the initial configured value.
 
 /calendar provider reset`;
 
-export default {name: "calendar provider reset", description: "Reset to initial provider", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar provider reset", description: "Reset to initial provider", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;

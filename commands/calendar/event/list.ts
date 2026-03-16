@@ -1,11 +1,19 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import markdownTable from "@tokenring-ai/utility/string/markdownTable";
 import CalendarService from "../../../CalendarService.ts";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
-  const trimmed = remainder.trim();
+const inputSchema = {
+  args: {},
+  prompt: {
+    description: "Optional limit for number of events",
+    required: false,
+  },
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const trimmed = prompt?.trim() ?? "";
   const limit = trimmed ? Number.parseInt(trimmed, 10) : 10;
   if (!Number.isFinite(limit) || limit <= 0) throw new CommandFailedError("Usage: /calendar event list [limit]");
 
@@ -29,4 +37,4 @@ List upcoming events from the active calendar provider.
 /calendar event list
 /calendar event list 5`;
 
-export default {name: "calendar event list", description: "List upcoming events", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event list", description: "List upcoming events", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;

@@ -1,11 +1,19 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
+const inputSchema = {
+  args: {},
+  prompt: {
+    description: "The provider name to set",
+    required: true,
+  },
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const calendarService = agent.requireServiceByType(CalendarService);
-  const providerName = remainder.trim();
+  const providerName = prompt.trim();
   if (!providerName) throw new CommandFailedError("Usage: /calendar provider set <name>");
   const available = calendarService.getAvailableProviders();
   if (available.includes(providerName)) {
@@ -23,4 +31,4 @@ Set the active calendar provider by name.
 
 /calendar provider set google-calendar`;
 
-export default {name: "calendar provider set", description: "Set the active provider", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar provider set", description: "Set the active provider", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;

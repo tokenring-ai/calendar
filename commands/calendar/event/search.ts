@@ -1,11 +1,19 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import markdownTable from "@tokenring-ai/utility/string/markdownTable";
 import CalendarService from "../../../CalendarService.ts";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
-  const query = remainder.trim();
+const inputSchema = {
+  args: {},
+  prompt: {
+    description: "Search query",
+    required: true,
+  },
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const query = prompt.trim();
   if (!query) throw new CommandFailedError("Usage: /calendar event search <query>");
 
   const events = await agent.requireServiceByType(CalendarService).searchEvents({query}, agent);
@@ -27,4 +35,4 @@ Search calendar events.
 
 /calendar event search standup`;
 
-export default {name: "calendar event search", description: "Search events", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event search", description: "Search events", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;

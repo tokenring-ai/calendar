@@ -1,10 +1,18 @@
-import Agent from "@tokenring-ai/agent/Agent";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 
-async function execute(remainder: string, agent: Agent): Promise<string> {
-  const [title, startAt, endAt, ...descriptionParts] = remainder.split("|").map(part => part.trim());
+const inputSchema = {
+  args: {},
+  prompt: {
+    description: "Event details: <title> | <start ISO> | <end ISO> | [description]",
+    required: true,
+  },
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const [title, startAt, endAt, ...descriptionParts] = prompt.split("|").map(part => part.trim());
   if (!title || !startAt || !endAt) {
     throw new CommandFailedError("Usage: /calendar event create <title> | <start ISO> | <end ISO> | [description]");
   }
@@ -27,4 +35,4 @@ Create a new calendar event.
 
 /calendar event create Team sync | 2026-03-10T17:00:00.000Z | 2026-03-10T17:30:00.000Z | Weekly status sync`;
 
-export default {name: "calendar event create", description: "Create an event", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event create", description: "Create an event", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;

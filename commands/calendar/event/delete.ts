@@ -1,10 +1,21 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
+
+const inputSchema = {
+  args: {},
+  allowAttachments: false,
+} as const satisfies AgentCommandInputSchema;
+
+async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  await agent.requireServiceByType(CalendarService).deleteCurrentEvent(agent);
+  return "Deleted current calendar event.";
+}
 
 export default {
   name: "calendar event delete",
   description: "Delete current event",
+  inputSchema,
+  execute,
   help: `# /calendar event delete
 
 Delete the currently selected event.
@@ -12,8 +23,4 @@ Delete the currently selected event.
 ## Example
 
 /calendar event delete`,
-  execute: async (_remainder: string, agent: Agent): Promise<string> => {
-    await agent.requireServiceByType(CalendarService).deleteCurrentEvent(agent);
-    return "Deleted current calendar event.";
-  },
-} satisfies TokenRingAgentCommand;
+} satisfies TokenRingAgentCommand<typeof inputSchema>;
