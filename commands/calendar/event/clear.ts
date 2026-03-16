@@ -4,7 +4,7 @@ import CalendarService from "../../../CalendarService.ts";
 
 export default {
   name: "calendar event clear",
-  description: "/calendar event clear - Clear current event selection",
+  description: "Clear current event selection",
   help: `# /calendar event clear
 
 Clear the current event selection.

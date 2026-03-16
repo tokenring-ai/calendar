@@ -31,4 +31,4 @@ Display information about the currently selected event.
 
 /calendar event info`;
 
-export default {name: "calendar event info", description: "/calendar event info - Show event details", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event info", description: "Show event details", help, execute} satisfies TokenRingAgentCommand;

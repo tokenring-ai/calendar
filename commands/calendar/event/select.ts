@@ -1,6 +1,6 @@
 import Agent from "@tokenring-ai/agent/Agent";
-import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
+import type {TreeLeaf} from "@tokenring-ai/agent/question";
 import {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 
@@ -45,4 +45,4 @@ Interactively select an upcoming event.
 
 /calendar event select`;
 
-export default {name: "calendar event select", description: "/calendar event select - Select an event", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event select", description: "Select an event", help, execute} satisfies TokenRingAgentCommand;

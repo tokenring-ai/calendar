@@ -4,7 +4,7 @@ import CalendarService from "../../../CalendarService.ts";
 
 export default {
   name: "calendar event get",
-  description: "/calendar event get - Show current event",
+  description: "Show current event",
   help: `# /calendar event get
 
 Display the currently selected calendar event title.

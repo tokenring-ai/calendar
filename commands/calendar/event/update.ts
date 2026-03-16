@@ -27,4 +27,4 @@ Update the currently selected event.
 
 /calendar event update Team sync | 2026-03-10T17:00:00.000Z | 2026-03-10T17:45:00.000Z | Extended sync`;
 
-export default {name: "calendar event update", description: "/calendar event update - Update current event", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event update", description: "Update current event", help, execute} satisfies TokenRingAgentCommand;

@@ -4,7 +4,7 @@ import {CalendarState} from "../../../state/CalendarState.ts";
 
 export default {
   name: "calendar provider get",
-  description: "/calendar provider get - Show current provider",
+  description: "Show current provider",
   help: `# /calendar provider get
 
 Display the currently active calendar provider.

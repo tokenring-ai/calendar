@@ -44,4 +44,4 @@ Interactively select the active calendar provider.
 
 /calendar provider select`;
 
-export default {name: "calendar provider select", description: "/calendar provider select - Interactively select a provider", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar provider select", description: "Interactively select a provider", help, execute} satisfies TokenRingAgentCommand;

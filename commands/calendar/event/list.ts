@@ -29,4 +29,4 @@ List upcoming events from the active calendar provider.
 /calendar event list
 /calendar event list 5`;
 
-export default {name: "calendar event list", description: "/calendar event list - List upcoming events", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event list", description: "List upcoming events", help, execute} satisfies TokenRingAgentCommand;

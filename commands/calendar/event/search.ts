@@ -27,4 +27,4 @@ Search calendar events.
 
 /calendar event search standup`;
 
-export default {name: "calendar event search", description: "/calendar event search - Search events", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event search", description: "Search events", help, execute} satisfies TokenRingAgentCommand;

@@ -23,4 +23,4 @@ Set the active calendar provider by name.
 
 /calendar provider set google-calendar`;
 
-export default {name: "calendar provider set", description: "/calendar provider set - Set the active provider", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar provider set", description: "Set the active provider", help, execute} satisfies TokenRingAgentCommand;

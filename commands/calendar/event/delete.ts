@@ -4,7 +4,7 @@ import CalendarService from "../../../CalendarService.ts";
 
 export default {
   name: "calendar event delete",
-  description: "/calendar event delete - Delete current event",
+  description: "Delete current event",
   help: `# /calendar event delete
 
 Delete the currently selected event.

@@ -19,4 +19,4 @@ Reset the active calendar provider to the initial configured value.
 
 /calendar provider reset`;
 
-export default {name: "calendar provider reset", description: "/calendar provider reset - Reset to initial provider", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar provider reset", description: "Reset to initial provider", help, execute} satisfies TokenRingAgentCommand;

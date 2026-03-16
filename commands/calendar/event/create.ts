@@ -27,4 +27,4 @@ Create a new calendar event.
 
 /calendar event create Team sync | 2026-03-10T17:00:00.000Z | 2026-03-10T17:30:00.000Z | Weekly status sync`;
 
-export default {name: "calendar event create", description: "/calendar event create - Create an event", help, execute} satisfies TokenRingAgentCommand;
+export default {name: "calendar event create", description: "Create an event", help, execute} satisfies TokenRingAgentCommand;
