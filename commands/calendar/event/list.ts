@@ -1,21 +1,23 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import markdownTable from "@tokenring-ai/utility/string/markdownTable";
 import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {
-  args: {},
-  prompt: {
-    description: "Optional limit for number of events",
-    required: false,
+  args: {
+    "--limit": {
+      type: "number",
+      required: false,
+      description: "Optional limit for number of events",
+      defaultValue: 10,
+      minimum: 1,
+      maximum: 100,
+    }
   },
   allowAttachments: false,
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const trimmed = prompt?.trim() ?? "";
-  const limit = trimmed ? Number.parseInt(trimmed, 10) : 10;
-  if (!Number.isFinite(limit) || limit <= 0) throw new CommandFailedError("Usage: /calendar event list [limit]");
+async function execute({args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const limit = args["--limit"];
 
   const events = await agent.requireServiceByType(CalendarService).getUpcomingEvents({limit}, agent);
   return `

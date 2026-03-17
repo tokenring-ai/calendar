@@ -3,10 +3,7 @@ import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} f
 import CalendarService from "../../../CalendarService.ts";
 import {CalendarState} from "../../../state/CalendarState.ts";
 
-const inputSchema = {
-  args: {},
-  allowAttachments: false,
-} as const satisfies AgentCommandInputSchema;
+const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const calendarService = agent.requireServiceByType(CalendarService);
@@ -40,9 +37,7 @@ async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Prom
   return "Provider selection cancelled.";
 }
 
-const help = `# /calendar provider select
-
-Interactively select the active calendar provider.
+const help = `Interactively select the active calendar provider.
 
 ## Example
 

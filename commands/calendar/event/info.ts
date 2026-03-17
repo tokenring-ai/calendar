@@ -2,10 +2,7 @@ import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} f
 import CalendarService from "../../../CalendarService.ts";
 import {CalendarState} from "../../../state/CalendarState.ts";
 
-const inputSchema = {
-  args: {},
-  allowAttachments: false,
-} as const satisfies AgentCommandInputSchema;
+const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const calendarService = agent.requireServiceByType(CalendarService);
@@ -27,9 +24,7 @@ async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Prom
   return lines.join("\n");
 }
 
-const help = `# /calendar event info
-
-Display information about the currently selected event.
+const help = `Display information about the currently selected event.
 
 ## Example
 

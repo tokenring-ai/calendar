@@ -6,7 +6,6 @@ import eventInfo from "./commands/calendar/event/info.ts";
 import eventList from "./commands/calendar/event/list.ts";
 import eventSearch from "./commands/calendar/event/search.ts";
 import eventSelect from "./commands/calendar/event/select.ts";
-import eventUpdate from "./commands/calendar/event/update.ts";
 import providerGet from "./commands/calendar/provider/get.ts";
 import providerReset from "./commands/calendar/provider/reset.ts";
 import providerSelect from "./commands/calendar/provider/select.ts";
@@ -20,7 +19,6 @@ export default [
   eventList,
   eventSearch,
   eventCreate,
-  eventUpdate,
   eventGet,
   eventSelect,
   eventInfo,

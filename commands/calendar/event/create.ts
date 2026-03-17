@@ -1,35 +1,51 @@
-import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {
-  args: {},
-  prompt: {
-    description: "Event details: <title> | <start ISO> | <end ISO> | [description]",
-    required: true,
+  args: {
+    "--title": {
+      type: "string",
+      required: true,
+      description: "Event title"
+    },
+    "--start": {
+      type: "string",
+      required: true,
+      description: "Event start time in ISO format"
+    },
+    "--end": {
+      type: "string",
+      required: true,
+      description: "Event end time in ISO format"
+    },
   },
+  positionals: [
+    {
+      name: 'description',
+      description: "Description of the event",
+      required: true,
+    }
+  ],
   allowAttachments: false,
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({prompt, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const [title, startAt, endAt, ...descriptionParts] = prompt.split("|").map(part => part.trim());
-  if (!title || !startAt || !endAt) {
-    throw new CommandFailedError("Usage: /calendar event create <title> | <start ISO> | <end ISO> | [description]");
-  }
+async function execute({args, positionals, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const title = args["--title"];
+  const startAt = args["--start"];
+  const endAt = args["--end"];
+  const description = positionals.description;
 
   const event = await agent.requireServiceByType(CalendarService).createEvent({
     title,
     startAt: new Date(startAt),
     endAt: new Date(endAt),
-    description: descriptionParts.join(" | ") || undefined,
+    description
   }, agent);
 
   return `Created event "${event.title}" (${event.id}) starting ${event.startAt.toLocaleString()}`;
 }
 
-const help = `# /calendar event create <title> | <start ISO> | <end ISO> | [description]
-
-Create a new calendar event.
+const help = `Create a new calendar event.
 
 ## Example
 

@@ -3,10 +3,7 @@ import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} f
 import CalendarService from "../../../CalendarService.ts";
 import {CalendarState} from "../../../state/CalendarState.ts";
 
-const inputSchema = {
-  args: {},
-  allowAttachments: false,
-} as const satisfies AgentCommandInputSchema;
+const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const initialProvider = agent.getState(CalendarState).initialConfig.provider;
@@ -15,9 +12,7 @@ async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Prom
   return `Provider reset to ${initialProvider}`;
 }
 
-const help = `# /calendar provider reset
-
-Reset the active calendar provider to the initial configured value.
+const help = `Reset the active calendar provider to the initial configured value.
 
 ## Example
 
