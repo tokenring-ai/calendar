@@ -25,8 +25,7 @@ const inputSchema = {
       description: "Description of the event",
       required: true,
     }
-  ],
-  allowAttachments: false,
+  ]
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({args, positionals, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {

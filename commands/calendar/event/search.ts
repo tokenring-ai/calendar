@@ -10,8 +10,7 @@ const inputSchema = {
       description: "Search query",
       required: true,
     },
-  ],
-  allowAttachments: false,
+  ]
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({positionals: {query}, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {

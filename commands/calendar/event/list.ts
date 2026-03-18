@@ -12,8 +12,7 @@ const inputSchema = {
       minimum: 1,
       maximum: 100,
     }
-  },
-  allowAttachments: false,
+  }
 } as const satisfies AgentCommandInputSchema;
 
 async function execute({args, agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
