@@ -29,11 +29,11 @@ export default class CalendarService implements TokenRingService {
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
     const agentConfig = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema));
-    agent.initializeState(CalendarState, agentConfig);
+    const initialState = agent.initializeState(CalendarState, agentConfig);
     for (const provider of this.providers.getAllItemValues()) {
       provider.attach?.(agent, creationContext);
     }
-    creationContext.items.push(`Selected calendar provider: ${agentConfig.provider ?? "(none)"}`);
+    creationContext.items.push(`Selected calendar provider: ${initialState.activeProvider ?? "(none)"}`);
 
     if (agentConfig.watch) {
       this.watchCalendar(agent);

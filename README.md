@@ -46,22 +46,34 @@ Main service class for calendar operations.
 
 ```ts
 class CalendarService implements TokenRingService {
+  /** Register a calendar provider by name */
   registerCalendarProvider(name: string, provider: CalendarProvider): void;
+  /** Get all registered provider names */
   getAvailableProviders(): string[];
+  /** Set the active provider for an agent */
   setActiveProvider(name: string, agent: Agent): void;
+  /** Get upcoming events from the active provider */
   getUpcomingEvents(filter: CalendarEventFilterOptions, agent: Agent): Promise<CalendarEvent[]>;
+  /** Search events in the active provider */
   searchEvents(filter: CalendarEventSearchOptions, agent: Agent): Promise<CalendarEvent[]>;
+  /** Create a new event and set it as current */
   createEvent(data: CreateCalendarEventData, agent: Agent): Promise<CalendarEvent>;
+  /** Update the currently selected event */
   updateEvent(data: UpdateCalendarEventData, agent: Agent): Promise<CalendarEvent>;
+  /** Select an event by ID and set it as current */
   selectEventById(id: string, agent: Agent): Promise<CalendarEvent>;
+  /** Get the currently selected event */
   getCurrentEvent(agent: Agent): CalendarEvent | null;
+  /** Clear the current event selection */
   clearCurrentEvent(agent: Agent): Promise<void>;
+  /** Delete the currently selected event */
   deleteCurrentEvent(agent: Agent): Promise<void>;
   
   // Watch functionality
+  /** Start watching for new calendar events */
   watchCalendar(agent: Agent): void;
+  /** Check for new events based on watch configuration */
   checkForNewEvents(watch: CalendarWatchSchema, agent: Agent): Promise<void>;
-}
 ```
 
 ### `CalendarProvider`
@@ -73,16 +85,61 @@ Provider interface implemented by concrete packages.
 ```ts
 interface CalendarProvider {
   description: string;
-  attach(agent: Agent, creationContext: AgentCreationContext): void;
+
+  /**
+   * Attach the provider to the agent.
+   * Providers should NOT initialize state here - state is managed by CalendarService.
+   */
+  attach?(agent: Agent, creationContext: AgentCreationContext): void;
+
+  /**
+   * Get upcoming calendar events.
+   * @param filter - Optional filter for limiting results
+   * @param agent - The agent instance
+   * @returns Array of events (state not modified)
+   */
   getUpcomingEvents(filter: CalendarEventFilterOptions, agent: Agent): Promise<CalendarEvent[]>;
+
+  /**
+   * Search calendar events.
+   * @param filter - Search options including query and limits
+   * @param agent - The agent instance
+   * @returns Array of matching events (state not modified)
+   */
   searchEvents(filter: CalendarEventSearchOptions, agent: Agent): Promise<CalendarEvent[]>;
+
+  /**
+   * Create a new calendar event.
+   * @param data - Event creation data
+   * @param agent - The agent instance
+   * @returns The created event (CalendarService will set it as current)
+   */
   createEvent(data: CreateCalendarEventData, agent: Agent): Promise<CalendarEvent>;
-  updateEvent(data: UpdateCalendarEventData, agent: Agent): Promise<CalendarEvent>;
+
+  /**
+   * Update an event by ID.
+   * @param id - The event ID to update
+   * @param data - The update data
+   * @param agent - The agent instance
+   * @returns The updated event (CalendarService will update current state)
+   */
+  updateEvent(id: string, data: UpdateCalendarEventData, agent: Agent): Promise<CalendarEvent>;
+
+  /**
+   * Select an event by ID.
+   * @param id - The event ID to select
+   * @param agent - The agent instance
+   * @returns The selected event (CalendarService will set it as current)
+   */
   selectEventById(id: string, agent: Agent): Promise<CalendarEvent>;
-  getCurrentEvent(agent: Agent): CalendarEvent | null;
-  clearCurrentEvent(agent: Agent): Promise<void>;
-  deleteCurrentEvent(agent: Agent): Promise<void>;
-}
+
+  /**
+   * Delete an event by ID.
+   * @param id - The event ID to delete
+   * @param agent - The agent instance
+   * CalendarService will handle clearing the state after deletion.
+   */
+  deleteEvent(id: string, agent: Agent): Promise<void>;
 ```
 
 ### Key Types
@@ -105,10 +162,10 @@ import CalendarPlugin from "@tokenring-ai/calendar/plugin";
 const app = new TokenRingApp();
 app.usePlugin(CalendarPlugin, {
   calendar: {
+    pollInterval: 300,  // Default poll interval in seconds
     agentDefaults: {
       provider: "google-calendar",
       watch: {
-        enabled: true,
         checkInterval: 300, // 5 minutes
         lookbackMinutes: 15,
         actions: [
@@ -142,7 +199,10 @@ import {CalendarService} from "@tokenring-ai/calendar";
 
 const calendarService = agent.requireServiceByType(CalendarService);
 
+// Get upcoming events
 const upcoming = await calendarService.getUpcomingEvents({limit: 10}, agent);
+
+// Create a new event
 const event = await calendarService.createEvent({
   title: "Team sync",
   startAt: new Date("2026-03-10T17:00:00.000Z"),
@@ -150,9 +210,16 @@ const event = await calendarService.createEvent({
   description: "Weekly status sync",
 }, agent);
 
-await calendarService.updateEvent({
-  description: "Weekly status sync with roadmap review",
-}, agent);
+// Select an event for follow-up
+await calendarService.selectEventById(event.id, agent);
+
+// Update the currently selected event
+const currentEvent = calendarService.getCurrentEvent(agent);
+if (currentEvent) {
+  await calendarService.updateEvent({
+    description: "Weekly status sync with roadmap review",
+  }, agent);
+}
 
 // Start watching for new events
 calendarService.watchCalendar(agent);
@@ -165,8 +232,10 @@ calendarService.watchCalendar(agent);
 /calendar event list 10
 /calendar event search standup
 /calendar event select
-/calendar event create Team sync | 2026-03-10T17:00:00.000Z | 2026-03-10T17:30:00.000Z | Weekly sync
-/calendar event update Team sync | 2026-03-10T17:00:00.000Z | 2026-03-10T17:45:00.000Z | Extended sync
+/calendar event create --title "Team sync" --start 2026-03-10T17:00:00.000Z --end 2026-03-10T17:30:00.000Z Weekly sync
+/calendar event get
+/calendar event info
+/calendar event clear
 /calendar event delete
 ```
 
@@ -177,12 +246,12 @@ The package is configured under the `calendar` key.
 ```ts
 {
   calendar: {
+    pollInterval: 300,  // Default poll interval in seconds
     agentDefaults: {
       provider: "google-calendar",
       watch: {
-        enabled: true,
-        checkInterval: 300,
-        lookbackMinutes: 15,
+        checkInterval: 300,  // Seconds between checks
+        lookbackMinutes: 15,  // How far back to check for new events
         actions: [
           {
             pattern: "meeting|sync",
@@ -206,53 +275,77 @@ The package is configured under the `calendar` key.
 ### Schemas
 
 - `CalendarWatchSchema`
-  - `enabled: boolean` - Whether watching is enabled
   - `checkInterval: number` - Seconds between checks (default: 300)
   - `lookbackMinutes: number` - How far back to check for new events (default: 15)
   - `actions: Array<{pattern: string, command: string}>` - Pattern/command pairs
 - `CalendarAgentConfigSchema`
-  - `provider?: string`
-  - `watch?: CalendarWatchSchema`
+  - `provider?: string` - Initial provider name
+  - `watch?: CalendarWatchSchema` - Watch configuration
 - `CalendarConfigSchema`
-  - `providers: Record<string, unknown>`
-  - `pollInterval: number` - Default poll interval in milliseconds
-  - `agentDefaults: CalendarAgentConfig`
+  - `providers: Record<string, unknown>` - Provider configurations
+  - `pollInterval: number` - Default poll interval in seconds (default: 300)
+  - `agentDefaults: CalendarAgentConfig` - Default agent configuration
 
 ## Integration
 
 The plugin registers:
 
-- `CalendarService`
-- calendar chat tools from `pkg/calendar/tools.ts`
-- calendar slash commands from `pkg/calendar/commands.ts`
-- scripting functions:
-  - `getUpcomingCalendarEvents(limit?)`
-  - `searchCalendarEvents(query, limit?)`
-  - `createCalendarEvent(title, startIso, endIso, description?)`
-  - `deleteCurrentCalendarEvent()`
+- `CalendarService` - Core service for calendar operations
+- **Chat Tools** (from `pkg/calendar/tools.ts`):
+  - `calendar_getUpcomingEvents` - Retrieve upcoming events
+  - `calendar_searchEvents` - Search calendar events
+  - `calendar_selectEvent` - Select an event by ID
+  - `calendar_getCurrentEvent` - Get currently selected event
+  - `calendar_createEvent` - Create a new event
+  - `calendar_updateEvent` - Update the current event
+  - `calendar_deleteCurrentEvent` - Delete the current event
+- **Slash Commands** (from `pkg/calendar/commands.ts`):
+  - Provider commands: `get`, `set`, `select`, `reset`
+  - Event commands: `list`, `search`, `create`, `get`, `select`, `info`, `clear`, `delete`
+- **Scripting Functions**:
+  - `getUpcomingCalendarEvents(limit?)` - Get upcoming events
+  - `searchCalendarEvents(query, limit?)` - Search events
+  - `createCalendarEvent(title, startIso, endIso, description?)` - Create event
+  - `deleteCurrentCalendarEvent()` - Delete current event
 
 Concrete provider packages register implementations by calling `CalendarService.registerCalendarProvider(...)`.
+
+## Provider Registration
+
+Concrete provider packages (e.g., Google Calendar, Outlook Calendar) register their implementations with the `CalendarService` using the `KeyedRegistry` pattern:
+
+```ts
+import CalendarService from "@tokenring-ai/calendar";
+
+// In provider package
+const calendarService = agent.requireServiceByType(CalendarService);
+calendarService.registerCalendarProvider("google-calendar", new GoogleCalendarProvider());
+```
+
+The `KeyedRegistry` pattern allows:
+- Multiple provider implementations to coexist
+- Dynamic provider selection per agent
+- Clean separation between abstract service and concrete implementations
 
 ## Chat Commands
 
 Provider commands:
 
-- `/calendar provider get`
-- `/calendar provider set <name>`
-- `/calendar provider select`
-- `/calendar provider reset`
+- `/calendar provider get` - Show current provider
+- `/calendar provider set <name>` - Set the active provider
+- `/calendar provider select` - Interactively select a provider
+- `/calendar provider reset` - Reset to initial configured provider
 
 Event commands:
 
-- `/calendar event list [limit]`
-- `/calendar event search <query>`
-- `/calendar event create <title> | <start ISO> | <end ISO> | [description]`
-- `/calendar event update [title] | [start ISO> | [end ISO> | [description]`
-- `/calendar event get`
-- `/calendar event select`
-- `/calendar event info`
-- `/calendar event clear`
-- `/calendar event delete`
+- `/calendar event list [limit]` - List upcoming events
+- `/calendar event search <query>` - Search events by query
+- `/calendar event create --title <title> --start <ISO> --end <ISO> <description>` - Create a new event
+- `/calendar event get` - Show current event title
+- `/calendar event select` - Interactively select an event
+- `/calendar event info` - Show detailed event information
+- `/calendar event clear` - Clear current event selection
+- `/calendar event delete` - Delete current event
 
 ## State Management
 
@@ -298,7 +391,6 @@ The calendar watch feature monitors for new calendar events and triggers automat
 ```typescript
 {
   watch: {
-    enabled: true,
     checkInterval: 300,        // Check every 5 minutes
     lookbackMinutes: 15,       // Look for events in last 15 minutes
     actions: [
@@ -364,6 +456,26 @@ This centralized approach ensures:
 - Better separation of concerns between service and provider layers
 - Reliable duplicate prevention for watched events
 
+## Best Practices
+
+### Provider Implementation
+
+When implementing a calendar provider:
+
+1. **Do NOT manage state**: Let `CalendarService` handle all state mutations
+2. **Return data only**: Provider methods should return event data without modifying state
+3. **Use existing state**: Read current event via `getCurrentEvent(agent)` for update/delete operations
+4. **Register properly**: Call `CalendarService.registerCalendarProvider()` to register your implementation
+
+### Watch Configuration
+
+When configuring calendar watches:
+
+1. **Use specific patterns**: Make regex patterns specific to avoid false positives
+2. **Test patterns**: Verify patterns match expected event content
+3. **Set appropriate intervals**: Balance responsiveness with resource usage
+4. **Consider lookback**: Set lookback time based on your use case
+
 ## Dependencies
 
 Key runtime dependencies:
@@ -375,6 +487,59 @@ Key runtime dependencies:
 - `@tokenring-ai/utility`
 - `zod`
 - `node:timers/promises`
+
+## Testing and Development
+
+### Running Tests
+
+```bash
+bun test
+# or
+bun run test
+```
+
+### Development Setup
+
+```bash
+# Install dependencies
+bun install
+
+# Run tests in watch mode
+bun run test:watch
+
+# Run type checking
+bun run build
+
+# Run test coverage
+bun run test:coverage
+```
+
+### Package Structure
+
+```
+pkg/calendar/
+├── index.ts              # Package exports
+├── plugin.ts             # Plugin definition
+├── schema.ts             # Configuration schemas
+├── CalendarProvider.ts   # Provider interface
+├── CalendarService.ts    # Core service
+├── state/
+│   └── CalendarState.ts  # State management
+├── tools.ts              # Tool definitions
+├── commands.ts           # Command definitions
+├── tools/                # Individual tools
+│   ├── createEvent.ts
+│   ├── deleteCurrentEvent.ts
+│   ├── getCurrentEvent.ts
+│   ├── getUpcomingEvents.ts
+│   ├── searchEvents.ts
+│   ├── selectEvent.ts
+│   └── updateEvent.ts
+└── commands/             # Individual commands
+    └── calendar/
+        ├── provider/     # Provider commands
+        └── event/        # Event commands
+```
 
 ## License
 
