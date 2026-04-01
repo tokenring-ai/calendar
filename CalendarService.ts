@@ -33,9 +33,9 @@ export default class CalendarService implements TokenRingService {
     for (const provider of this.providers.getAllItemValues()) {
       provider.attach?.(agent, creationContext);
     }
-    creationContext.items.push(`Selected calendar provider: ${initialState.activeProvider ?? "(none)"}`);
+    creationContext.items.push(`Calendar provider: ${initialState.activeProvider ?? "(none)"}`);
 
-    if (agentConfig.watch) {
+    if (agentConfig.watch && initialState.activeProvider) {
       this.watchCalendar(agent);
     }
   }
@@ -61,10 +61,11 @@ export default class CalendarService implements TokenRingService {
           if (!watch) break;
 
           await this.checkForNewEvents(watch, agent);
-          await delay(checkInterval, null, {signal});
         } catch (error) {
           agent.errorMessage(`Error while checking for new calendar events: ${error}`);
         }
+
+        await delay(checkInterval, null, {signal});
       }
       agent.mutateState(CalendarState, state => {
         state.isWatching = false;
