@@ -1,11 +1,13 @@
 import {AgentCommandService} from "@tokenring-ai/agent";
 import {TokenRingPlugin} from "@tokenring-ai/app";
 import {ChatService} from "@tokenring-ai/chat";
+import {RpcService} from "@tokenring-ai/rpc";
 import {ScriptingService} from "@tokenring-ai/scripting";
 import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService";
 import {z} from "zod";
 import CalendarService from "./CalendarService.ts";
 import commands from "./commands.ts";
+import calendarRPC from "./rpc/calendar.ts";
 import {CalendarConfigSchema} from "./index.ts";
 import packageJSON from "./package.json" with {type: "json"};
 import tools from "./tools.ts";
@@ -74,6 +76,10 @@ export default {
 
     app.waitForService(ChatService, chatService => chatService.addTools(tools));
     app.waitForService(AgentCommandService, commandService => commandService.addAgentCommands(commands));
+
+    app.waitForService(RpcService, rpcService => {
+      rpcService.registerEndpoint(calendarRPC);
+    });
   },
   config: packageConfigSchema,
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;

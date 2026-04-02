@@ -63,44 +63,38 @@ export interface CalendarProvider {
   description: string;
 
   /**
-   * Attach the provider to the agent.
-   * Providers should NOT initialize state here - state is managed by CalendarService.
-   */
-  attach?(agent: Agent, creationContext: AgentCreationContext): void;
-
-  /**
    * Get upcoming calendar events.
-   * @returns Array of events (state not modified)
+   * @returns Array of events
    */
-  getUpcomingEvents(filter: CalendarEventFilterOptions, agent: Agent): Promise<CalendarEvent[]>;
+  getUpcomingEvents(filter: CalendarEventFilterOptions): Promise<CalendarEvent[]>;
 
   /**
    * Search calendar events.
-   * @returns Array of events (state not modified)
+   * @returns Array of events
    */
-  searchEvents(filter: CalendarEventSearchOptions, agent: Agent): Promise<CalendarEvent[]>;
+  searchEvents(filter: CalendarEventSearchOptions): Promise<CalendarEvent[]>;
 
   /**
    * Create a new calendar event.
-   * @returns The created event (CalendarService will set it as current)
+   * @returns The created event
    */
-  createEvent(data: CreateCalendarEventData, agent: Agent): Promise<CalendarEvent>;
+  createEvent(data: CreateCalendarEventData): Promise<CalendarEvent>;
 
   /**
-   * Update the currently selected event.
-   * @returns The updated event (CalendarService will update current state)
+   * Update an event.
+   * @returns The updated event
    */
-  updateEvent(id: string, data: UpdateCalendarEventData, agent: Agent): Promise<CalendarEvent>;
+  updateEvent(id: string, data: UpdateCalendarEventData): Promise<CalendarEvent>;
 
   /**
-   * Select an event by ID.
-   * @returns The selected event (CalendarService will set it as current)
+   * Get an event by ID.
+   * @returns The selected event
    */
-  selectEventById(id: string, agent: Agent): Promise<CalendarEvent>;
+  getEventById(id: string): Promise<CalendarEvent>;
 
   /**
-   * Delete the currently selected event.
+   * Delete an event.
    * CalendarService will handle clearing the state after deletion.
    */
-  deleteEvent(id: string, agent: Agent): Promise<void>;
+  deleteEvent(id: string): Promise<void>;
 }

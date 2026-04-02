@@ -15,7 +15,6 @@ export const CalendarAgentConfigSchema = z.object({
 }).default({});
 
 export const CalendarConfigSchema = z.object({
-  providers: z.record(z.string(), z.any()).default({}),
   pollInterval: z.number().default(300).transform(seconds => seconds * 1000), // default 5 minutes
   agentDefaults: CalendarAgentConfigSchema.prefault({}),
 });
