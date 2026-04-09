@@ -1,5 +1,3 @@
-import {Agent} from "@tokenring-ai/agent";
-import type {AgentCreationContext} from "@tokenring-ai/agent/types";
 import z from "zod";
 
 export interface CalendarAttendee {

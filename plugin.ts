@@ -7,9 +7,9 @@ import {ScriptingThis} from "@tokenring-ai/scripting/ScriptingService";
 import {z} from "zod";
 import CalendarService from "./CalendarService.ts";
 import commands from "./commands.ts";
-import calendarRPC from "./rpc/calendar.ts";
 import {CalendarConfigSchema} from "./index.ts";
 import packageJSON from "./package.json" with {type: "json"};
+import calendarRPC from "./rpc/calendar.ts";
 import tools from "./tools.ts";
 
 const packageConfigSchema = z.object({

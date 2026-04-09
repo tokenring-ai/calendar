@@ -1,9 +1,8 @@
 import {Agent} from "@tokenring-ai/agent";
 import {AgentStateSlice} from "@tokenring-ai/agent/types";
 import {z} from "zod";
-import {CalendarAgentConfigSchema, CalendarWatchSchema} from "../schema.ts";
 import {type CalendarEvent, CalendarEventSchema} from "../CalendarProvider.ts";
-
+import {CalendarAgentConfigSchema, CalendarWatchSchema} from "../schema.ts";
 
 const serializationSchema = z.object({
   activeProvider: z.string().nullable(),
