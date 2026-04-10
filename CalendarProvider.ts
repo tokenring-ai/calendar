@@ -6,7 +6,6 @@ export interface CalendarAttendee {
   responseStatus?: "accepted" | "declined" | "tentative" | "needsAction";
 }
 
-
 export const CalendarEventSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -15,11 +14,17 @@ export const CalendarEventSchema = z.object({
   startAt: z.date(),
   endAt: z.date(),
   allDay: z.boolean().optional(),
-  attendees: z.array(z.object({
-    email: z.string(),
-    name: z.string().optional(),
-    responseStatus: z.enum(["accepted", "declined", "tentative", "needsAction"]).optional(),
-  })).optional(),
+  attendees: z
+    .array(
+      z.object({
+        email: z.string(),
+        name: z.string().optional(),
+        responseStatus: z
+          .enum(["accepted", "declined", "tentative", "needsAction"])
+          .optional(),
+      }),
+    )
+    .optional(),
   status: z.enum(["confirmed", "tentative", "cancelled"]).optional(),
   url: z.string().optional(),
   meetingUrl: z.string().optional(),
@@ -27,7 +32,7 @@ export const CalendarEventSchema = z.object({
   updatedAt: z.number().optional(),
 });
 
-export type CalendarEvent = z.input<typeof CalendarEventSchema>
+export type CalendarEvent = z.input<typeof CalendarEventSchema>;
 
 export interface CalendarEventFilterOptions {
   limit?: number;
@@ -42,16 +47,21 @@ export interface CalendarEventSearchOptions {
   to?: Date;
 }
 
-export type CreateCalendarEventData = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
+export type CreateCalendarEventData = Omit<
+  CalendarEvent,
+  "id" | "createdAt" | "updatedAt"
+>;
 
-export type UpdateCalendarEventData = Partial<Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">>;
+export type UpdateCalendarEventData = Partial<
+  Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">
+>;
 
 /**
  * CalendarProvider interface for calendar platform integrations.
- * 
+ *
  * NOTE: State management (currentEvent, activeProvider) is handled by CalendarService
  * and stored in CalendarState. Providers should NOT manage their own state slices.
- * 
+ *
  * - Providers should return event data without modifying agent state
  * - CalendarService manages setting currentEvent after create/select/update operations
  * - Providers can read currentEvent via getCurrentEvent() for operations like update/delete
@@ -64,7 +74,9 @@ export interface CalendarProvider {
    * Get upcoming calendar events.
    * @returns Array of events
    */
-  getUpcomingEvents(filter: CalendarEventFilterOptions): Promise<CalendarEvent[]>;
+  getUpcomingEvents(
+    filter: CalendarEventFilterOptions,
+  ): Promise<CalendarEvent[]>;
 
   /**
    * Search calendar events.
@@ -82,7 +94,10 @@ export interface CalendarProvider {
    * Update an event.
    * @returns The updated event
    */
-  updateEvent(id: string, data: UpdateCalendarEventData): Promise<CalendarEvent>;
+  updateEvent(
+    id: string,
+    data: UpdateCalendarEventData,
+  ): Promise<CalendarEvent>;
 
   /**
    * Get an event by ID.

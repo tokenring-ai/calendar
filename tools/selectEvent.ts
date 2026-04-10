@@ -1,5 +1,5 @@
-import Agent from "@tokenring-ai/agent/Agent";
-import {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import type Agent from "@tokenring-ai/agent/Agent";
+import type {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import CalendarService from "../CalendarService.ts";
 
@@ -12,7 +12,9 @@ const inputSchema = z.object({
 });
 
 async function execute({id}: z.output<typeof inputSchema>, agent: Agent) {
-  const event = await agent.requireServiceByType(CalendarService).selectEventById(id, agent);
+  const event = await agent
+    .requireServiceByType(CalendarService)
+    .selectEventById(id, agent);
   return `
 Selected event: "${event.title}" (ID: ${event.id})
 Start: ${event.startAt.toISOString()}
@@ -23,4 +25,10 @@ ${JSON.stringify(event, null, 2)}
   `.trim();
 }
 
-export default {name, displayName, description, inputSchema, execute} satisfies TokenRingToolDefinition<typeof inputSchema>;
+export default {
+  name,
+  displayName,
+  description,
+  inputSchema,
+  execute,
+} satisfies TokenRingToolDefinition<typeof inputSchema>;

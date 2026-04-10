@@ -1,18 +1,23 @@
 import {CommandFailedError} from "@tokenring-ai/agent/AgentError";
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
-import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand,} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
-async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({
+                         agent,
+                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const calendarService = agent.requireServiceByType(CalendarService);
 
   try {
-    const events = await calendarService.getUpcomingEvents({limit: 25}, agent);
+    const events = await calendarService.getUpcomingEvents(
+      {limit: 25},
+      agent,
+    );
     if (!events?.length) return "No events found.";
 
-    const tree: TreeLeaf[] = events.map(event => ({
+    const tree: TreeLeaf[] = events.map((event) => ({
       name: `${event.title} (${new Date(event.startAt).toLocaleString()})`,
       value: event.id,
     }));
@@ -34,7 +39,9 @@ async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Prom
     const event = await calendarService.selectEventById(selection[0], agent);
     return `Selected event: "${event.title}"`;
   } catch (error) {
-    throw new CommandFailedError(`Error during event selection: ${error instanceof Error ? error.message : String(error)}`);
+    throw new CommandFailedError(
+      `Error during event selection: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -44,4 +51,10 @@ const help = `Interactively select an upcoming event.
 
 /calendar event select`;
 
-export default {name: "calendar event select", description: "Select an event", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;
+export default {
+  name: "calendar event select",
+  description: "Select an event",
+  inputSchema,
+  help,
+  execute,
+} satisfies TokenRingAgentCommand<typeof inputSchema>;

@@ -1,11 +1,13 @@
 import type {TreeLeaf} from "@tokenring-ai/agent/question";
-import {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand,} from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 import {CalendarState} from "../../../state/CalendarState.ts";
 
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
-async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({
+                         agent,
+                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const calendarService = agent.requireServiceByType(CalendarService);
   const available = calendarService.getAvailableProviders();
   if (available.length === 0) return "No calendar providers are registered.";
@@ -15,7 +17,10 @@ async function execute({agent}: AgentCommandInputType<typeof inputSchema>): Prom
   }
 
   const activeProvider = agent.getState(CalendarState).activeProvider;
-  const tree: TreeLeaf[] = available.map((name: string) => ({name: `${name}${name === activeProvider ? " (current)" : ""}`, value: name}));
+  const tree: TreeLeaf[] = available.map((name: string) => ({
+    name: `${name}${name === activeProvider ? " (current)" : ""}`,
+    value: name,
+  }));
   const selection = await agent.askQuestion({
     message: "Select an active calendar provider",
     question: {
@@ -43,4 +48,10 @@ const help = `Interactively select the active calendar provider.
 
 /calendar provider select`;
 
-export default {name: "calendar provider select", description: "Interactively select a provider", inputSchema, help, execute} satisfies TokenRingAgentCommand<typeof inputSchema>;
+export default {
+  name: "calendar provider select",
+  description: "Interactively select a provider",
+  inputSchema,
+  help,
+  execute,
+} satisfies TokenRingAgentCommand<typeof inputSchema>;

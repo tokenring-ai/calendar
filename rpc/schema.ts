@@ -1,4 +1,4 @@
-import {RPCSchema} from "@tokenring-ai/rpc/types";
+import type {RPCSchema} from "@tokenring-ai/rpc/types";
 import {z} from "zod";
 import {CalendarEventSchema} from "../CalendarProvider.ts";
 
@@ -61,7 +61,11 @@ export default {
       input: z.object({
         id: z.string(),
         provider: z.string(),
-        updatedData: CalendarEventSchema.omit({id: true, createdAt: true, updatedAt: true}).partial(),
+        updatedData: CalendarEventSchema.omit({
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+        }).partial(),
       }),
       result: z.object({
         event: CalendarEventSchema,
@@ -76,7 +80,7 @@ export default {
       }),
       result: z.object({
         message: z.string(),
-      })
+      }),
     },
     getCalendarState: {
       type: "query",

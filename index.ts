@@ -1,5 +1,3 @@
-export {CalendarConfigSchema, CalendarAgentConfigSchema, CalendarWatchSchema} from "./schema.ts";
-export {default as CalendarService} from "./CalendarService.ts";
 export type {
   CalendarAttendee,
   CalendarEvent,
@@ -9,3 +7,9 @@ export type {
   CreateCalendarEventData,
   UpdateCalendarEventData,
 } from "./CalendarProvider.ts";
+export {default as CalendarService} from "./CalendarService.ts";
+export {
+  CalendarAgentConfigSchema,
+  CalendarConfigSchema,
+  CalendarWatchSchema,
+} from "./schema.ts";

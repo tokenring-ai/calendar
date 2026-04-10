@@ -1,13 +1,12 @@
 import {AgentManager} from "@tokenring-ai/agent";
-import TokenRingApp from "@tokenring-ai/app";
+import type TokenRingApp from "@tokenring-ai/app";
 import {createRPCEndpoint} from "@tokenring-ai/rpc/createRPCEndpoint";
 import CalendarService from "../CalendarService.ts";
 import {CalendarState} from "../state/CalendarState.ts";
 import CalendarRpcSchema from "./schema.ts";
 
 export default createRPCEndpoint(CalendarRpcSchema, {
-
-  async getCalendarProviders(_args, app: TokenRingApp) {
+  getCalendarProviders(_args, app: TokenRingApp) {
     const calendarService = app.requireService(CalendarService);
 
     return {
@@ -89,7 +88,7 @@ export default createRPCEndpoint(CalendarRpcSchema, {
     };
   },
 
-  async getCalendarState(args, app: TokenRingApp) {
+  getCalendarState(args, app: TokenRingApp) {
     const agent = app.requireService(AgentManager).getAgent(args.agentId);
     if (!agent) throw new Error("Agent not found");
     const calendarService = app.requireService(CalendarService);

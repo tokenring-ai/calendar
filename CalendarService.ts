@@ -1,10 +1,10 @@
-import Agent from "@tokenring-ai/agent/Agent";
+import type Agent from "@tokenring-ai/agent/Agent";
 import type {AgentCreationContext} from "@tokenring-ai/agent/types";
-import {TokenRingService} from "@tokenring-ai/app/types";
+import type {TokenRingService} from "@tokenring-ai/app/types";
 import deepMerge from "@tokenring-ai/utility/object/deepMerge";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import {setTimeout as delay} from "node:timers/promises";
-import {z} from "zod";
+import type {z} from "zod";
 import type {
   CalendarEvent,
   CalendarEventFilterOptions,
@@ -13,7 +13,7 @@ import type {
   CreateCalendarEventData,
   UpdateCalendarEventData,
 } from "./CalendarProvider.ts";
-import {CalendarAgentConfigSchema, CalendarConfigSchema, CalendarWatchSchema} from "./schema.ts";
+import {CalendarAgentConfigSchema, type CalendarConfigSchema, type CalendarWatchSchema,} from "./schema.ts";
 import {CalendarState} from "./state/CalendarState.ts";
 
 export default class CalendarService implements TokenRingService {
@@ -26,12 +26,18 @@ export default class CalendarService implements TokenRingService {
   getAvailableProviders = this.providers.getAllItemNames;
   requireCalendarProvider = this.providers.requireItemByName;
 
-  constructor(readonly options: z.output<typeof CalendarConfigSchema>) {}
+  constructor(readonly options: z.output<typeof CalendarConfigSchema>) {
+  }
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
-    const agentConfig = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema));
+    const agentConfig = deepMerge(
+      this.options.agentDefaults,
+      agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema),
+    );
     const initialState = agent.initializeState(CalendarState, agentConfig);
-    creationContext.items.push(`Calendar provider: ${initialState.activeProvider ?? "(none)"}`);
+    creationContext.items.push(
+      `Calendar provider: ${initialState.activeProvider ?? "(none)"}`,
+    );
 
     if (agentConfig.watch && initialState.activeProvider) {
       this.watchCalendar(agent);
@@ -39,7 +45,7 @@ export default class CalendarService implements TokenRingService {
   }
 
   watchCalendar(agent: Agent): void {
-    const wasWatching = agent.mutateState(CalendarState, state => {
+    const wasWatching = agent.mutateState(CalendarState, (state) => {
       if (state.isWatching) return true;
       state.isWatching = true;
       return false;
@@ -60,20 +66,25 @@ export default class CalendarService implements TokenRingService {
 
           await this.checkForNewEvents(watch, agent);
         } catch (error) {
-          agent.errorMessage(`Error while checking for new calendar events: ${error}`);
+          agent.errorMessage(
+            `Error while checking for new calendar events: ${error}`,
+          );
         }
 
         await delay(checkInterval, null, {signal});
       }
-      agent.mutateState(CalendarState, state => {
+      agent.mutateState(CalendarState, (state) => {
         state.isWatching = false;
       });
     });
   }
 
-  async checkForNewEvents(watch: z.output<typeof CalendarWatchSchema>, agent: Agent): Promise<void> {
+  async checkForNewEvents(
+    watch: z.output<typeof CalendarWatchSchema>,
+    agent: Agent,
+  ): Promise<void> {
     const provider = this.requireActiveCalendarProvider(agent);
-    
+
     // Calculate the time window to check
     const lookbackMs = watch.lookbackMinutes * 60 * 1000;
     const sinceTime = new Date(Date.now() - lookbackMs);
@@ -85,7 +96,7 @@ export default class CalendarService implements TokenRingService {
     });
 
     // Filter for new events that haven't been processed
-    const newEvents = agent.mutateState(CalendarState, state => {
+    const newEvents = agent.mutateState(CalendarState, (state) => {
       const newEvents: CalendarEvent[] = [];
       for (const event of events) {
         if (!state.processedEventIds.has(event.id)) {
@@ -136,7 +147,9 @@ export default class CalendarService implements TokenRingService {
     ];
 
     if (event.attendees?.length) {
-      lines.push(`Attendees: ${event.attendees.map(a => `${a.name ?? ""} <${a.email}>`).join(", ")}`);
+      lines.push(
+        `Attendees: ${event.attendees.map((a) => `${a.name ?? ""} <${a.email}>`).join(", ")}`,
+      );
     }
 
     if (event.status) {
@@ -156,55 +169,74 @@ export default class CalendarService implements TokenRingService {
 
   requireActiveCalendarProvider(agent: Agent): CalendarProvider {
     const activeProvider = agent.getState(CalendarState).activeProvider;
-    if (!activeProvider) throw new Error("No calendar provider is currently selected");
+    if (!activeProvider)
+      throw new Error("No calendar provider is currently selected");
     return this.providers.requireItemByName(activeProvider);
   }
 
   setActiveProvider(name: string, agent: Agent): void {
-    agent.mutateState(CalendarState, state => {
+    agent.mutateState(CalendarState, (state) => {
       state.activeProvider = name;
     });
   }
 
-  async getUpcomingEvents(filter: CalendarEventFilterOptions, agent: Agent): Promise<CalendarEvent[]> {
+  getUpcomingEvents(
+    filter: CalendarEventFilterOptions,
+    agent: Agent,
+  ): Promise<CalendarEvent[]> {
     return this.requireActiveCalendarProvider(agent).getUpcomingEvents(filter);
   }
 
-  async searchEvents(filter: CalendarEventSearchOptions, agent: Agent): Promise<CalendarEvent[]> {
+  searchEvents(
+    filter: CalendarEventSearchOptions,
+    agent: Agent,
+  ): Promise<CalendarEvent[]> {
     return this.requireActiveCalendarProvider(agent).searchEvents(filter);
   }
 
-  async createEvent(data: CreateCalendarEventData, agent: Agent): Promise<CalendarEvent> {
-    const event = await this.requireActiveCalendarProvider(agent).createEvent(data);
+  async createEvent(
+    data: CreateCalendarEventData,
+    agent: Agent,
+  ): Promise<CalendarEvent> {
+    const event =
+      await this.requireActiveCalendarProvider(agent).createEvent(data);
     // Set the created event as current
-    agent.mutateState(CalendarState, state => {
+    agent.mutateState(CalendarState, (state) => {
       state.currentEvent = event;
     });
     return event;
   }
 
-  async updateEvent(data: UpdateCalendarEventData, agent: Agent): Promise<CalendarEvent> {
+  async updateEvent(
+    data: UpdateCalendarEventData,
+    agent: Agent,
+  ): Promise<CalendarEvent> {
     const currentEvent = agent.getState(CalendarState).currentEvent;
-    if (!currentEvent) throw new Error("No calendar event is currently selected");
+    if (!currentEvent)
+      throw new Error("No calendar event is currently selected");
 
     const newEvent = {
       ...currentEvent,
-      ...data
+      ...data,
     };
     newEvent.updatedAt = Date.now();
 
-    const event = await this.requireActiveCalendarProvider(agent).updateEvent(currentEvent.id, newEvent);
+    const event = await this.requireActiveCalendarProvider(agent).updateEvent(
+      currentEvent.id,
+      newEvent,
+    );
     // Update the current event in state
-    agent.mutateState(CalendarState, state => {
+    agent.mutateState(CalendarState, (state) => {
       state.currentEvent = event;
     });
     return event;
   }
 
   async selectEventById(id: string, agent: Agent): Promise<CalendarEvent> {
-    const event = await this.requireActiveCalendarProvider(agent).getEventById(id);
+    const event =
+      await this.requireActiveCalendarProvider(agent).getEventById(id);
     // Set the selected event as current
-    agent.mutateState(CalendarState, state => {
+    agent.mutateState(CalendarState, (state) => {
       state.currentEvent = event;
     });
     return event;
@@ -214,20 +246,23 @@ export default class CalendarService implements TokenRingService {
     return agent.getState(CalendarState).currentEvent;
   }
 
-  async clearCurrentEvent(agent: Agent): Promise<void> {
-    agent.mutateState(CalendarState, state => {
+  clearCurrentEvent(agent: Agent): void {
+    agent.mutateState(CalendarState, (state) => {
       state.currentEvent = null;
     });
   }
 
   async deleteCurrentEvent(agent: Agent): Promise<void> {
     const currentEvent = this.getCurrentEvent(agent);
-    if (!currentEvent) throw new Error("No calendar event is currently selected");
+    if (!currentEvent)
+      throw new Error("No calendar event is currently selected");
 
-    await this.requireActiveCalendarProvider(agent).deleteEvent(currentEvent.id);
-    
+    await this.requireActiveCalendarProvider(agent).deleteEvent(
+      currentEvent.id,
+    );
+
     // Clear the current event from state after deletion
-    agent.mutateState(CalendarState, state => {
+    agent.mutateState(CalendarState, (state) => {
       state.currentEvent = null;
     });
   }

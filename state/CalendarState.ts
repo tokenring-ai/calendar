@@ -1,15 +1,18 @@
-import {Agent} from "@tokenring-ai/agent";
+import type {Agent} from "@tokenring-ai/agent";
 import {AgentStateSlice} from "@tokenring-ai/agent/types";
+import markdownList from "@tokenring-ai/utility/string/markdownList";
 import {z} from "zod";
-import {type CalendarEvent, CalendarEventSchema} from "../CalendarProvider.ts";
-import {CalendarAgentConfigSchema, CalendarWatchSchema} from "../schema.ts";
+import {type CalendarEvent, CalendarEventSchema,} from "../CalendarProvider.ts";
+import {type CalendarAgentConfigSchema, CalendarWatchSchema} from "../schema.ts";
 
-const serializationSchema = z.object({
-  activeProvider: z.string().nullable(),
-  currentEvent: CalendarEventSchema.nullable().optional(),
-  watch: CalendarWatchSchema.optional(),
-  processedEventIds: z.array(z.string()).optional(),
-}).prefault({activeProvider: null, currentEvent: null});
+const serializationSchema = z
+  .object({
+    activeProvider: z.string().nullable(),
+    currentEvent: CalendarEventSchema.nullable().optional(),
+    watch: CalendarWatchSchema.optional(),
+    processedEventIds: z.array(z.string()).optional(),
+  })
+  .prefault({activeProvider: null, currentEvent: null});
 
 export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
   activeProvider: string | null;
@@ -18,7 +21,9 @@ export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
   processedEventIds: Set<string>;
   isWatching: boolean;
 
-  constructor(readonly initialConfig: z.output<typeof CalendarAgentConfigSchema>) {
+  constructor(
+    readonly initialConfig: z.output<typeof CalendarAgentConfigSchema>,
+  ) {
     super("CalendarState", serializationSchema);
     this.activeProvider = initialConfig.provider ?? null;
     this.currentEvent = null;
@@ -50,14 +55,16 @@ export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
     this.processedEventIds = new Set(data.processedEventIds ?? []);
   }
 
-  show(): string[] {
-    return [
-      `Active Calendar Provider: ${this.activeProvider}`,
-      `Current Event: ${this.currentEvent?.title ?? "None"}`,
-      `Watching: ${this.isWatching ? "Yes" : "No"}`,
-      ...(this.watch && Object.keys(this.watch.actions ?? {}).length > 0
-        ? ["Calendar Watches:", ...Object.entries(this.watch.actions).map(([key, value]) => `  - ${key}: Pattern: ${value.pattern}, Command: ${value.command}`)]
-        : ["No watches configured"]),
-    ];
+  show(): string {
+    const watchLines = this.watch && Object.keys(this.watch.actions ?? {}).length > 0
+      ? Object.entries(this.watch.actions).map(
+        ([key, value]) => `${key}: Pattern: ${value.pattern}, Command: ${value.command}`,
+      )
+      : ["No watches configured"];
+    return `Active Calendar Provider: ${this.activeProvider}
+Current Event: ${this.currentEvent?.title ?? "None"}
+Watching: ${this.isWatching ? "Yes" : "No"}
+Calendar Watches:
+${markdownList(watchLines)}`;
   }
 }
