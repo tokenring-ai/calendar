@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import {z} from "zod";
 import CalendarService from "../CalendarService.ts";
 
@@ -23,7 +23,7 @@ const inputSchema = z.object({
   status: z.enum(["confirmed", "tentative", "cancelled"]).optional(),
 });
 
-async function execute(input: z.output<typeof inputSchema>, agent: Agent) {
+async function execute(input: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const event = await agent.requireServiceByType(CalendarService).updateEvent(
     {
       ...input,
@@ -33,7 +33,7 @@ async function execute(input: z.output<typeof inputSchema>, agent: Agent) {
     agent,
   );
   agent.infoMessage(`[${name}] Event updated: ${event.id}`);
-  return {type: "json" as const, data: event};
+  return JSON.stringify(event);
 }
 
 export default {

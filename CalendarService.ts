@@ -13,7 +13,7 @@ import type {
   CreateCalendarEventData,
   UpdateCalendarEventData,
 } from "./CalendarProvider.ts";
-import {CalendarAgentConfigSchema, type CalendarConfigSchema, type CalendarWatchSchema,} from "./schema.ts";
+import {CalendarAgentConfigSchema, type CalendarConfigSchema, type CalendarWatchSchema} from "./schema.ts";
 import {CalendarState} from "./state/CalendarState.ts";
 
 export default class CalendarService implements TokenRingService {
@@ -122,12 +122,10 @@ export default class CalendarService implements TokenRingService {
             message: action.command,
             attachments: [
               {
-                type: "attachment",
                 name: event.title,
                 encoding: "text",
-                mimeType: "text/calendar",
+                mimeType: "text/plain",
                 body: eventText,
-                timestamp: Date.now(),
               },
             ],
           });

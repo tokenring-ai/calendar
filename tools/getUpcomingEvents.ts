@@ -1,5 +1,5 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition} from "@tokenring-ai/chat/schema";
+import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
 import markdownTable from "@tokenring-ai/utility/string/markdownTable";
 import {z} from "zod";
 import CalendarService from "../CalendarService.ts";
@@ -26,7 +26,7 @@ const inputSchema = z.object({
 async function execute(
   {limit, from, to}: z.output<typeof inputSchema>,
   agent: Agent,
-) {
+): Promise<TokenRingToolResult> {
   const events = await agent
     .requireServiceByType(CalendarService)
     .getUpcomingEvents(

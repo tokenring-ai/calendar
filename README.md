@@ -323,6 +323,7 @@ calendarService.registerCalendarProvider("google-calendar", new GoogleCalendarPr
 ```
 
 The `KeyedRegistry` pattern allows:
+
 - Multiple provider implementations to coexist
 - Dynamic provider selection per agent
 - Clean separation between abstract service and concrete implementations
@@ -450,6 +451,7 @@ Patterns are tested as case-insensitive regular expressions against this text.
 - `watchCalendar()` → manages `isWatching` flag and background task
 
 This centralized approach ensures:
+
 - Consistent state management across all providers
 - Easier checkpoint serialization and restoration
 - Cleaner provider implementations
