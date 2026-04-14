@@ -65,9 +65,9 @@ export default class CalendarService implements TokenRingService {
           if (!watch) break;
 
           await this.checkForNewEvents(watch, agent);
-        } catch (error) {
+        } catch (error: unknown) {
           agent.errorMessage(
-            `Error while checking for new calendar events: ${error}`,
+            `Error while checking for new calendar events:`, error as Error
           );
         }
 

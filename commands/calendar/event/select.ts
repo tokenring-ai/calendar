@@ -38,7 +38,7 @@ async function execute({
 
     const event = await calendarService.selectEventById(selection[0], agent);
     return `Selected event: "${event.title}"`;
-  } catch (error) {
+  } catch (error: unknown) {
     throw new CommandFailedError(
       `Error during event selection: ${error instanceof Error ? error.message : String(error)}`,
     );

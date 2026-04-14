@@ -3,10 +3,10 @@ import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
-async function execute({
+function execute({
                          agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  await agent.requireServiceByType(CalendarService).clearCurrentEvent(agent);
+                       }: AgentCommandInputType<typeof inputSchema>) {
+  agent.requireServiceByType(CalendarService).clearCurrentEvent(agent);
   return "Event cleared. No calendar event is currently selected.";
 }
 
