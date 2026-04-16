@@ -22,9 +22,9 @@ export default class CalendarService implements TokenRingService {
 
   private providers = new KeyedRegistry<CalendarProvider>();
 
-  registerCalendarProvider = this.providers.register;
-  getAvailableProviders = this.providers.getAllItemNames;
-  requireCalendarProvider = this.providers.requireItemByName;
+  registerCalendarProvider = this.providers.set;
+  getAvailableProviders = this.providers.keysArray;
+  requireCalendarProvider = this.providers.require;
 
   constructor(readonly options: z.output<typeof CalendarConfigSchema>) {
   }
@@ -169,7 +169,7 @@ export default class CalendarService implements TokenRingService {
     const activeProvider = agent.getState(CalendarState).activeProvider;
     if (!activeProvider)
       throw new Error("No calendar provider is currently selected");
-    return this.providers.requireItemByName(activeProvider);
+    return this.providers.require(activeProvider);
   }
 
   setActiveProvider(name: string, agent: Agent): void {

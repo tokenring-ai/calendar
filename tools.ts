@@ -6,7 +6,7 @@ import searchEvents from "./tools/searchEvents.ts";
 import selectEvent from "./tools/selectEvent.ts";
 import updateEvent from "./tools/updateEvent.ts";
 
-export default {
+export default [
   getUpcomingEvents,
   searchEvents,
   selectEvent,
@@ -14,4 +14,4 @@ export default {
   createEvent,
   updateEvent,
   deleteCurrentEvent,
-};
+];
