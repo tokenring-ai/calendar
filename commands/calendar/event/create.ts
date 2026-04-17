@@ -3,17 +3,17 @@ import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {
   args: {
-    "--title": {
+    "title": {
       type: "string",
       required: true,
       description: "Event title",
     },
-    "--start": {
+    "start": {
       type: "string",
       required: true,
       description: "Event start time in ISO format",
     },
-    "--end": {
+    "end": {
       type: "string",
       required: true,
       description: "Event end time in ISO format",
@@ -33,9 +33,9 @@ async function execute({
                          positionals,
                          agent,
                        }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const title = args["--title"];
-  const startAt = args["--start"];
-  const endAt = args["--end"];
+  const title = args.title;
+  const startAt = args.start;
+  const endAt = args.end;
   const description = positionals.description;
 
   const event = await agent.requireServiceByType(CalendarService).createEvent(

@@ -4,7 +4,7 @@ import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {
   args: {
-    "--limit": {
+    "limit": {
       type: "number",
       required: false,
       description: "Optional limit for number of events",
@@ -19,7 +19,7 @@ async function execute({
                          args,
                          agent,
                        }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const limit = args["--limit"];
+  const limit = args.limit;
 
   const events = await agent
     .requireServiceByType(CalendarService)
