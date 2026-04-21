@@ -2,59 +2,52 @@ import z from "zod";
 
 export interface CalendarAttendee {
   email: string;
-  name?: string;
+  name?: string | undefined;
   responseStatus?: "accepted" | "declined" | "tentative" | "needsAction";
 }
 
 export const CalendarEventSchema = z.object({
   id: z.string(),
   title: z.string(),
-  description: z.string().optional(),
-  location: z.string().optional(),
+  description: z.string().exactOptional(),
+  location: z.string().exactOptional(),
   startAt: z.date(),
   endAt: z.date(),
-  allDay: z.boolean().optional(),
+  allDay: z.boolean().exactOptional(),
   attendees: z
     .array(
       z.object({
         email: z.string(),
-        name: z.string().optional(),
-        responseStatus: z
-          .enum(["accepted", "declined", "tentative", "needsAction"])
-          .optional(),
+        name: z.string().exactOptional(),
+        responseStatus: z.enum(["accepted", "declined", "tentative", "needsAction"]).exactOptional(),
       }),
     )
-    .optional(),
-  status: z.enum(["confirmed", "tentative", "cancelled"]).optional(),
-  url: z.string().optional(),
-  meetingUrl: z.string().optional(),
-  createdAt: z.number().optional(),
-  updatedAt: z.number().optional(),
+    .exactOptional(),
+  status: z.enum(["confirmed", "tentative", "cancelled"]).exactOptional(),
+  url: z.string().exactOptional(),
+  meetingUrl: z.string().exactOptional(),
+  createdAt: z.number().exactOptional(),
+  updatedAt: z.number().exactOptional(),
 });
 
 export type CalendarEvent = z.input<typeof CalendarEventSchema>;
 
 export interface CalendarEventFilterOptions {
-  limit?: number;
-  from?: Date;
-  to?: Date;
+  limit?: number | undefined;
+  from?: Date | undefined;
+  to?: Date | undefined;
 }
 
 export interface CalendarEventSearchOptions {
   query: string;
-  limit?: number;
-  from?: Date;
-  to?: Date;
+  limit?: number | undefined;
+  from?: Date | undefined;
+  to?: Date | undefined;
 }
 
-export type CreateCalendarEventData = Omit<
-  CalendarEvent,
-  "id" | "createdAt" | "updatedAt"
->;
+export type CreateCalendarEventData = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
 
-export type UpdateCalendarEventData = Partial<
-  Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">
->;
+export type UpdateCalendarEventData = Partial<Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">>;
 
 /**
  * CalendarProvider interface for calendar platform integrations.
@@ -74,9 +67,7 @@ export interface CalendarProvider {
    * Get upcoming calendar events.
    * @returns Array of events
    */
-  getUpcomingEvents(
-    filter: CalendarEventFilterOptions,
-  ): Promise<CalendarEvent[]>;
+  getUpcomingEvents(filter: CalendarEventFilterOptions): Promise<CalendarEvent[]>;
 
   /**
    * Search calendar events.
@@ -94,10 +85,7 @@ export interface CalendarProvider {
    * Update an event.
    * @returns The updated event
    */
-  updateEvent(
-    id: string,
-    data: UpdateCalendarEventData,
-  ): Promise<CalendarEvent>;
+  updateEvent(id: string, data: UpdateCalendarEventData): Promise<CalendarEvent>;
 
   /**
    * Get an event by ID.

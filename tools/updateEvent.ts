@@ -1,6 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import CalendarService from "../CalendarService.ts";
 
 const name = "calendar_updateEvent";
@@ -9,26 +9,26 @@ const description = "Update the currently selected calendar event";
 
 const attendeeSchema = z.object({
   email: z.string().email(),
-  name: z.string().optional(),
+  name: z.string().exactOptional(),
 });
 
 const inputSchema = z.object({
-  title: z.string().optional(),
-  startAt: z.string().datetime().optional(),
-  endAt: z.string().datetime().optional(),
-  description: z.string().optional(),
-  location: z.string().optional(),
-  allDay: z.boolean().optional(),
-  attendees: z.array(attendeeSchema).optional(),
-  status: z.enum(["confirmed", "tentative", "cancelled"]).optional(),
+  title: z.string().exactOptional(),
+  startAt: z.string().datetime().exactOptional(),
+  endAt: z.string().datetime().exactOptional(),
+  description: z.string().exactOptional(),
+  location: z.string().exactOptional(),
+  allDay: z.boolean().exactOptional(),
+  attendees: z.array(attendeeSchema).exactOptional(),
+  status: z.enum(["confirmed", "tentative", "cancelled"]).exactOptional(),
 });
 
-async function execute(input: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
+async function execute({ startAt, endAt, ...input }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const event = await agent.requireServiceByType(CalendarService).updateEvent(
     {
       ...input,
-      startAt: input.startAt ? new Date(input.startAt) : undefined,
-      endAt: input.endAt ? new Date(input.endAt) : undefined,
+      ...(startAt && { startAt: new Date(startAt) }),
+      ...(endAt && { endAt: new Date(endAt) }),
     },
     agent,
   );

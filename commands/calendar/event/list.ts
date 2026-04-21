@@ -1,10 +1,10 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import markdownTable from "@tokenring-ai/utility/string/markdownTable";
 import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {
   args: {
-    "limit": {
+    limit: {
       type: "number",
       required: false,
       description: "Optional limit for number of events",
@@ -15,26 +15,16 @@ const inputSchema = {
   },
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({
-                         args,
-                         agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const limit = args.limit;
 
-  const events = await agent
-    .requireServiceByType(CalendarService)
-    .getUpcomingEvents({limit}, agent);
+  const events = await agent.requireServiceByType(CalendarService).getUpcomingEvents({ limit }, agent);
   return `
 Upcoming events:
 
 ${markdownTable(
-    ["ID", "Title", "Start", "End"],
-    events.map((event) => [
-      event.id,
-      event.title,
-      event.startAt.toLocaleString(),
-      event.endAt.toLocaleString(),
-    ]),
+  ["ID", "Title", "Start", "End"],
+  events.map(event => [event.id, event.title, event.startAt.toLocaleString(), event.endAt.toLocaleString()]),
 )}
   `.trim();
 }

@@ -7,7 +7,7 @@ export type {
   CreateCalendarEventData,
   UpdateCalendarEventData,
 } from "./CalendarProvider.ts";
-export {default as CalendarService} from "./CalendarService.ts";
+export { default as CalendarService } from "./CalendarService.ts";
 export {
   CalendarAgentConfigSchema,
   CalendarConfigSchema,

@@ -1,4 +1,4 @@
-import {z} from "zod";
+import { z } from "zod";
 
 export const CalendarWatchSchema = z
   .object({
@@ -17,8 +17,8 @@ export const CalendarWatchSchema = z
 
 export const CalendarAgentConfigSchema = z
   .object({
-    provider: z.string().optional(),
-    watch: CalendarWatchSchema.optional(),
+    provider: z.string().exactOptional(),
+    watch: CalendarWatchSchema.exactOptional(),
   })
   .default({});
 
@@ -26,6 +26,6 @@ export const CalendarConfigSchema = z.object({
   pollInterval: z
     .number()
     .default(300)
-    .transform((seconds) => seconds * 1000), // default 5 minutes
+    .transform(seconds => seconds * 1000), // default 5 minutes
   agentDefaults: CalendarAgentConfigSchema.prefault({}),
 });

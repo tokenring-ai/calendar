@@ -1,6 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import CalendarService from "../CalendarService.ts";
 
 const name = "calendar_getCurrentEvent";
@@ -10,12 +10,8 @@ const description = "Retrieve the currently selected calendar event";
 const inputSchema = z.object({});
 
 function execute(_input: z.output<typeof inputSchema>, agent: Agent): TokenRingToolResult {
-  const event = agent
-    .requireServiceByType(CalendarService)
-    .getCurrentEvent(agent);
-  return event
-    ? JSON.stringify(event)
-    : "No calendar event is currently selected.";
+  const event = agent.requireServiceByType(CalendarService).getCurrentEvent(agent);
+  return event ? JSON.stringify(event) : "No calendar event is currently selected.";
 }
 
 export default {

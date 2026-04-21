@@ -1,13 +1,11 @@
-import type {TreeLeaf} from "@tokenring-ai/agent/question";
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type { TreeLeaf } from "@tokenring-ai/agent/question";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
-import {CalendarState} from "../../../state/CalendarState.ts";
+import { CalendarState } from "../../../state/CalendarState.ts";
 
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
-async function execute({
-                         agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const calendarService = agent.requireServiceByType(CalendarService);
   const available = calendarService.getAvailableProviders();
   if (available.length === 0) return "No calendar providers are registered.";

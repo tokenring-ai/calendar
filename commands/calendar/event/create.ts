@@ -1,19 +1,19 @@
-import type {AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand} from "@tokenring-ai/agent/types";
+import type { AgentCommandInputSchema, AgentCommandInputType, TokenRingAgentCommand } from "@tokenring-ai/agent/types";
 import CalendarService from "../../../CalendarService.ts";
 
 const inputSchema = {
   args: {
-    "title": {
+    title: {
       type: "string",
       required: true,
       description: "Event title",
     },
-    "start": {
+    start: {
       type: "string",
       required: true,
       description: "Event start time in ISO format",
     },
-    "end": {
+    end: {
       type: "string",
       required: true,
       description: "Event end time in ISO format",
@@ -28,11 +28,7 @@ const inputSchema = {
   ],
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({
-                         args,
-                         positionals,
-                         agent,
-                       }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ args, positionals, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const title = args.title;
   const startAt = args.start;
   const endAt = args.end;

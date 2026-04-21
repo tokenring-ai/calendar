@@ -1,6 +1,6 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
-import {z} from "zod";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
+import { z } from "zod";
 import CalendarService from "../CalendarService.ts";
 
 const name = "calendar_createEvent";
@@ -9,17 +9,17 @@ const description = "Create a new calendar event";
 
 const attendeeSchema = z.object({
   email: z.string().email(),
-  name: z.string().optional(),
+  name: z.string().exactOptional(),
 });
 
 const inputSchema = z.object({
   title: z.string().describe("Event title"),
   startAt: z.string().datetime().describe("Event start time in ISO format"),
   endAt: z.string().datetime().describe("Event end time in ISO format"),
-  description: z.string().optional(),
-  location: z.string().optional(),
-  allDay: z.boolean().optional(),
-  attendees: z.array(attendeeSchema).optional(),
+  description: z.string().exactOptional(),
+  location: z.string().exactOptional(),
+  allDay: z.boolean().exactOptional(),
+  attendees: z.array(attendeeSchema).exactOptional(),
 });
 
 async function execute(input: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {

@@ -1,8 +1,9 @@
-import {AgentManager} from "@tokenring-ai/agent";
+import { AgentManager } from "@tokenring-ai/agent";
 import type TokenRingApp from "@tokenring-ai/app";
-import {createRPCEndpoint} from "@tokenring-ai/rpc/createRPCEndpoint";
+import { createRPCEndpoint } from "@tokenring-ai/rpc/createRPCEndpoint";
+import { stripUndefinedKeys } from "@tokenring-ai/utility/object/stripObject";
 import CalendarService from "../CalendarService.ts";
-import {CalendarState} from "../state/CalendarState.ts";
+import { CalendarState } from "../state/CalendarState.ts";
 import CalendarRpcSchema from "./schema.ts";
 
 export default createRPCEndpoint(CalendarRpcSchema, {
@@ -50,14 +51,16 @@ export default createRPCEndpoint(CalendarRpcSchema, {
     const calendarService = app.requireService(CalendarService);
     const provider = calendarService.requireCalendarProvider(args.provider);
 
-    const event = await provider.createEvent({
-      title: args.title,
-      startAt: new Date(args.startAt),
-      endAt: new Date(args.endAt),
-      description: args.description,
-      location: args.location,
-      allDay: args.allDay,
-    });
+    const event = await provider.createEvent(
+      stripUndefinedKeys({
+        title: args.title,
+        startAt: new Date(args.startAt),
+        endAt: new Date(args.endAt),
+        description: args.description,
+        location: args.location,
+        allDay: args.allDay,
+      }),
+    );
 
     return {
       event,
@@ -69,7 +72,7 @@ export default createRPCEndpoint(CalendarRpcSchema, {
     const calendarService = app.requireService(CalendarService);
     const provider = calendarService.requireCalendarProvider(args.provider);
 
-    const event = await provider.updateEvent(args.id, args.updatedData);
+    const event = await provider.updateEvent(args.id, stripUndefinedKeys(args.updatedData));
 
     return {
       event,
@@ -91,14 +94,14 @@ export default createRPCEndpoint(CalendarRpcSchema, {
   getCalendarState(args, app: TokenRingApp) {
     const agent = app.requireService(AgentManager).getAgent(args.agentId);
     if (!agent) {
-      return {status: 'agentNotFound'};
+      return { status: "agentNotFound" };
     }
     const calendarService = app.requireService(CalendarService);
 
     const state = agent.getState(CalendarState);
 
     return {
-      status: 'success',
+      status: "success",
       selectedEventId: state.currentEvent?.id ?? null,
       selectedProvider: state.activeProvider,
       availableProviders: calendarService.getAvailableProviders(),
@@ -108,7 +111,7 @@ export default createRPCEndpoint(CalendarRpcSchema, {
   async updateCalendarState(args, app: TokenRingApp) {
     const agent = app.requireService(AgentManager).getAgent(args.agentId);
     if (!agent) {
-      return {status: 'agentNotFound'};
+      return { status: "agentNotFound" };
     }
     const calendarService = app.requireService(CalendarService);
 
@@ -123,7 +126,7 @@ export default createRPCEndpoint(CalendarRpcSchema, {
     const state = agent.getState(CalendarState);
 
     return {
-      status: 'success',
+      status: "success",
       selectedEventId: state.currentEvent?.id ?? null,
       selectedProvider: state.activeProvider,
       availableProviders: calendarService.getAvailableProviders(),

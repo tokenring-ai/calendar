@@ -1,7 +1,7 @@
 import type Agent from "@tokenring-ai/agent/Agent";
-import type {TokenRingToolDefinition, TokenRingToolResult} from "@tokenring-ai/chat/schema";
+import type { TokenRingToolDefinition, TokenRingToolResult } from "@tokenring-ai/chat/schema";
 import markdownTable from "@tokenring-ai/utility/string/markdownTable";
-import {z} from "zod";
+import { z } from "zod";
 import CalendarService from "../CalendarService.ts";
 
 const name = "calendar_searchEvents";
@@ -10,15 +10,12 @@ const description = "Search calendar events using the active provider";
 
 const inputSchema = z.object({
   query: z.string().describe("Search query for calendar events"),
-  limit: z.number().int().positive().default(10).optional(),
-  from: z.string().datetime().optional(),
-  to: z.string().datetime().optional(),
+  limit: z.number().int().positive().default(10).exactOptional(),
+  from: z.string().datetime().exactOptional(),
+  to: z.string().datetime().exactOptional(),
 });
 
-async function execute(
-  {query, limit, from, to}: z.output<typeof inputSchema>,
-  agent: Agent,
-): Promise<TokenRingToolResult> {
+async function execute({ query, limit, from, to }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
   const events = await agent.requireServiceByType(CalendarService).searchEvents(
     {
       query,
@@ -33,13 +30,8 @@ async function execute(
 Search results for "${query}":
 
 ${markdownTable(
-    ["ID", "Title", "Start", "Status"],
-    events.map((event) => [
-      event.id,
-      event.title,
-      event.startAt.toISOString(),
-      event.status ?? "",
-    ]),
+  ["ID", "Title", "Start", "Status"],
+  events.map(event => [event.id, event.title, event.startAt.toISOString(), event.status ?? ""]),
 )}
   `.trim();
 }
