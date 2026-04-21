@@ -90,12 +90,15 @@ export default createRPCEndpoint(CalendarRpcSchema, {
 
   getCalendarState(args, app: TokenRingApp) {
     const agent = app.requireService(AgentManager).getAgent(args.agentId);
-    if (!agent) throw new Error("Agent not found");
+    if (!agent) {
+      return {status: 'agentNotFound'};
+    }
     const calendarService = app.requireService(CalendarService);
 
     const state = agent.getState(CalendarState);
 
     return {
+      status: 'success',
       selectedEventId: state.currentEvent?.id ?? null,
       selectedProvider: state.activeProvider,
       availableProviders: calendarService.getAvailableProviders(),
@@ -104,7 +107,9 @@ export default createRPCEndpoint(CalendarRpcSchema, {
 
   async updateCalendarState(args, app: TokenRingApp) {
     const agent = app.requireService(AgentManager).getAgent(args.agentId);
-    if (!agent) throw new Error("Agent not found");
+    if (!agent) {
+      return {status: 'agentNotFound'};
+    }
     const calendarService = app.requireService(CalendarService);
 
     if (args.selectedProvider) {
@@ -118,6 +123,7 @@ export default createRPCEndpoint(CalendarRpcSchema, {
     const state = agent.getState(CalendarState);
 
     return {
+      status: 'success',
       selectedEventId: state.currentEvent?.id ?? null,
       selectedProvider: state.activeProvider,
       availableProviders: calendarService.getAvailableProviders(),

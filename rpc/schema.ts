@@ -1,5 +1,6 @@
 import type {RPCSchema} from "@tokenring-ai/rpc/types";
 import {z} from "zod";
+import {AgentNotFoundSchema} from "@tokenring-ai/agent/schema";
 import {CalendarEventSchema} from "../CalendarProvider.ts";
 
 export default {
@@ -87,11 +88,15 @@ export default {
       input: z.object({
         agentId: z.string(),
       }),
-      result: z.object({
-        selectedEventId: z.string().nullable(),
-        selectedProvider: z.string().nullable(),
-        availableProviders: z.array(z.string()),
-      }),
+      result: z.discriminatedUnion("status", [
+        z.object({
+          status: z.literal('success'),
+          selectedEventId: z.string().nullable(),
+          selectedProvider: z.string().nullable(),
+          availableProviders: z.array(z.string()),
+        }),
+        AgentNotFoundSchema
+      ]),
     },
     updateCalendarState: {
       type: "mutation",
@@ -100,11 +105,15 @@ export default {
         selectedProvider: z.string().optional(),
         selectedEventId: z.string().optional(),
       }),
-      result: z.object({
-        selectedEventId: z.string().nullable(),
-        selectedProvider: z.string().nullable(),
-        availableProviders: z.array(z.string()),
-      }),
+      result: z.discriminatedUnion("status", [
+        z.object({
+          status: z.literal('success'),
+          selectedEventId: z.string().nullable(),
+          selectedProvider: z.string().nullable(),
+          availableProviders: z.array(z.string()),
+        }),
+        AgentNotFoundSchema
+      ]),
     },
   },
 } satisfies RPCSchema;
