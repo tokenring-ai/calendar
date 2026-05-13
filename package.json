@@ -3,12 +3,12 @@
   "version": "0.2.0",
   "description": "An abstract calendar interface for Token Ring",
   "dependencies": {
-    "@tokenring-ai/agent": "0.2.0",
-    "@tokenring-ai/app": "0.2.0",
-    "@tokenring-ai/chat": "0.2.0",
-    "@tokenring-ai/rpc": "0.2.0",
-    "@tokenring-ai/scripting": "0.2.0",
-    "@tokenring-ai/utility": "0.2.0",
+    "@tokenring-ai/agent": "workspace:*",
+    "@tokenring-ai/app": "workspace:*",
+    "@tokenring-ai/chat": "workspace:*",
+    "@tokenring-ai/rpc": "workspace:*",
+    "@tokenring-ai/scripting": "workspace:*",
+    "@tokenring-ai/utility": "workspace:*",
     "zod": "^4.3.6"
   },
   "exports": {

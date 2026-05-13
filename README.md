@@ -2,8 +2,10 @@
 
 ## Overview
 
-`@tokenring-ai/calendar` provides an abstract calendar interface for Token Ring. It defines a provider-based architecture
-that enables agents to interact with calendar systems through tools, slash commands, RPC endpoints, and scripting functions.
+`@tokenring-ai/calendar` provides an abstract calendar interface for Token Ring. It defines a provider-based
+architecture
+that enables agents to interact with calendar systems through tools, slash commands, RPC endpoints, and scripting
+functions.
 
 Key capabilities:
 
@@ -57,25 +59,25 @@ app.usePlugin(CalendarPlugin, {
 
 ### Provider Commands
 
-| Command | Description |
-|---------|-------------|
-| `/calendar provider get` | Display the currently active calendar provider |
-| `/calendar provider set <name>` | Set the active provider by name |
-| `/calendar provider select` | Interactively select a calendar provider |
-| `/calendar provider reset` | Reset to the initially configured provider |
+| Command                         | Description                                    |
+|---------------------------------|------------------------------------------------|
+| `/calendar provider get`        | Display the currently active calendar provider |
+| `/calendar provider set <name>` | Set the active provider by name                |
+| `/calendar provider select`     | Interactively select a calendar provider       |
+| `/calendar provider reset`      | Reset to the initially configured provider     |
 
 ### Event Commands
 
-| Command | Description |
-|---------|-------------|
-| `/calendar event list [limit]` | List upcoming events (default: 10) |
-| `/calendar event search <query>` | Search events by query |
-| `/calendar event create --title <title> --start <ISO> --end <ISO> <description>` | Create a new event |
-| `/calendar event get` | Display the currently selected event title |
-| `/calendar event select` | Interactively select an upcoming event |
-| `/calendar event info` | Show detailed information about the selected event |
-| `/calendar event clear` | Clear the current event selection |
-| `/calendar event delete` | Delete the currently selected event |
+| Command                                                                          | Description                                        |
+|----------------------------------------------------------------------------------|----------------------------------------------------|
+| `/calendar event list [limit]`                                                   | List upcoming events (default: 10)                 |
+| `/calendar event search <query>`                                                 | Search events by query                             |
+| `/calendar event create --title <title> --start <ISO> --end <ISO> <description>` | Create a new event                                 |
+| `/calendar event get`                                                            | Display the currently selected event title         |
+| `/calendar event select`                                                         | Interactively select an upcoming event             |
+| `/calendar event info`                                                           | Show detailed information about the selected event |
+| `/calendar event clear`                                                          | Clear the current event selection                  |
+| `/calendar event delete`                                                         | Delete the currently selected event                |
 
 ### Command Examples
 
@@ -98,15 +100,15 @@ app.usePlugin(CalendarPlugin, {
 
 ## Tools
 
-| Tool | Description |
-|------|-------------|
-| `calendar_getUpcomingEvents` | Retrieve upcoming calendar events |
-| `calendar_searchEvents` | Search calendar events by query |
-| `calendar_selectEvent` | Select an event by ID for follow-up actions |
-| `calendar_getCurrentEvent` | Get the currently selected event |
-| `calendar_createEvent` | Create a new calendar event |
-| `calendar_updateEvent` | Update the currently selected event |
-| `calendar_deleteCurrentEvent` | Delete the currently selected event |
+| Tool                          | Description                                 |
+|-------------------------------|---------------------------------------------|
+| `calendar_getUpcomingEvents`  | Retrieve upcoming calendar events           |
+| `calendar_searchEvents`       | Search calendar events by query             |
+| `calendar_selectEvent`        | Select an event by ID for follow-up actions |
+| `calendar_getCurrentEvent`    | Get the currently selected event            |
+| `calendar_createEvent`        | Create a new calendar event                 |
+| `calendar_updateEvent`        | Update the currently selected event         |
+| `calendar_deleteCurrentEvent` | Delete the currently selected event         |
 
 ### Tool Schema Examples
 
@@ -248,7 +250,8 @@ class CalendarService implements TokenRingService {
 
 Interface for calendar provider implementations.
 
-**Important**: Providers should NOT manage their own state. All state is handled by `CalendarService` in `CalendarState`.
+**Important**: Providers should NOT manage their own state. All state is handled by `CalendarService` in
+`CalendarState`.
 
 ```typescript
 interface CalendarProvider {
