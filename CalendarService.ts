@@ -1,8 +1,8 @@
+import deepClone from "@tokenring-ai/utility/object/deepClone";
 import { setTimeout as delay } from "node:timers/promises";
 import type Agent from "@tokenring-ai/agent/Agent";
 import type { AgentCreationContext } from "@tokenring-ai/agent/types";
 import type { TokenRingService } from "@tokenring-ai/app/types";
-import deepMerge from "@tokenring-ai/utility/object/deepMerge";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import type { z } from "zod";
 import type {
@@ -29,7 +29,7 @@ export default class CalendarService implements TokenRingService {
   constructor(readonly options: z.output<typeof CalendarConfigSchema>) {}
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
-    const agentConfig = deepMerge(this.options.agentDefaults, agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema));
+    const agentConfig = deepClone(this.options.agentDefaults, agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema));
     const initialState = agent.initializeState(CalendarState, agentConfig);
     creationContext.items.push(`Calendar provider: ${initialState.activeProvider ?? "(none)"}`);
 

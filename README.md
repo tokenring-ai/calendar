@@ -60,7 +60,7 @@ app.usePlugin(CalendarPlugin, {
 ### Provider Commands
 
 | Command                         | Description                                    |
-|---------------------------------|------------------------------------------------|
+| :------------------------------ | :--------------------------------------------- |
 | `/calendar provider get`        | Display the currently active calendar provider |
 | `/calendar provider set <name>` | Set the active provider by name                |
 | `/calendar provider select`     | Interactively select a calendar provider       |
@@ -68,16 +68,16 @@ app.usePlugin(CalendarPlugin, {
 
 ### Event Commands
 
-| Command                                                                          | Description                                        |
-|----------------------------------------------------------------------------------|----------------------------------------------------|
-| `/calendar event list [limit]`                                                   | List upcoming events (default: 10)                 |
-| `/calendar event search <query>`                                                 | Search events by query                             |
-| `/calendar event create --title <title> --start <ISO> --end <ISO> <description>` | Create a new event                                 |
-| `/calendar event get`                                                            | Display the currently selected event title         |
-| `/calendar event select`                                                         | Interactively select an upcoming event             |
-| `/calendar event info`                                                           | Show detailed information about the selected event |
-| `/calendar event clear`                                                          | Clear the current event selection                  |
-| `/calendar event delete`                                                         | Delete the currently selected event                |
+| Command                                          | Description                                        |
+| :----------------------------------------------- | :------------------------------------------------- |
+| `/calendar event list [limit]`                   | List upcoming events (default: 10)                 |
+| `/calendar event search <query>`                 | Search events by query                             |
+| `/calendar event create` | Create a new event (see examples for syntax) |
+| `/calendar event get`                            | Display the currently selected event title         |
+| `/calendar event select`                         | Interactively select an upcoming event             |
+| `/calendar event info`                           | Show detailed information about the selected event |
+| `/calendar event clear`                          | Clear the current event selection                  |
+| `/calendar event delete`                         | Delete the currently selected event                |
 
 ### Command Examples
 
@@ -90,7 +90,7 @@ app.usePlugin(CalendarPlugin, {
 /calendar event list
 /calendar event list 20
 /calendar event search standup
-/calendar event create --title "Team sync" --start 2026-03-10T17:00:00.000Z --end 2026-03-10T17:30:00.000Z Weekly status sync
+/calendar event create "Team sync" | 2026-03-10T17:00:00.000Z | 2026-03-10T17:30:00.000Z | Weekly status sync
 /calendar event get
 /calendar event select
 /calendar event info
@@ -153,7 +153,7 @@ The package is configured under the `calendar` key in your plugin configuration.
 
 ```yaml
 calendar:
-  pollInterval: 300  # Default poll interval in seconds
+  pollInterval: 300  # Default poll interval in seconds (transformed to milliseconds internally)
   agentDefaults:
     provider: "google-calendar"  # Initial provider name
     watch:
@@ -172,7 +172,7 @@ calendar:
 
 ```typescript
 {
-  pollInterval: number;        // Default poll interval in seconds (default: 300)
+  pollInterval: number;        // Default poll interval in seconds (default: 300, transformed to milliseconds)
   agentDefaults: CalendarAgentConfigSchema;
 }
 ```
@@ -220,9 +220,9 @@ The main service class that provides calendar operations and provider management
 ```typescript
 class CalendarService implements TokenRingService {
   readonly name = "CalendarService";
-  readonly description = "Abstract interface for calendar operations";
+  description = "Abstract interface for calendar operations";
 
-  // Provider management
+  // Provider management (via KeyedRegistry)
   registerCalendarProvider: (name: string, provider: CalendarProvider) => void;
   getAvailableProviders: () => string[];
   requireCalendarProvider: (name: string) => CalendarProvider;
@@ -243,6 +243,10 @@ class CalendarService implements TokenRingService {
   // Watch functionality
   watchCalendar: (agent: Agent) => void;
   checkForNewEvents: (watch: CalendarWatchSchema, agent: Agent) => Promise<void>;
+  
+  // Utility methods
+  formatEventForPatternMatching: (event: CalendarEvent) => string;
+  requireActiveCalendarProvider: (agent: Agent) => CalendarProvider;
 }
 ```
 
@@ -257,11 +261,40 @@ Interface for calendar provider implementations.
 interface CalendarProvider {
   description: string;
 
+  /**
+   * Get upcoming calendar events.
+   * @returns Array of events
+   */
   getUpcomingEvents: (filter: CalendarEventFilterOptions) => Promise<CalendarEvent[]>;
+
+  /**
+   * Search calendar events.
+   * @returns Array of events
+   */
   searchEvents: (filter: CalendarEventSearchOptions) => Promise<CalendarEvent[]>;
+
+  /**
+   * Create a new calendar event.
+   * @returns The created event
+   */
   createEvent: (data: CreateCalendarEventData) => Promise<CalendarEvent>;
+
+  /**
+   * Update an event.
+   * @returns The updated event
+   */
   updateEvent: (id: string, data: UpdateCalendarEventData) => Promise<CalendarEvent>;
+
+  /**
+   * Get an event by ID.
+   * @returns The selected event
+   */
   getEventById: (id: string) => Promise<CalendarEvent>;
+
+  /**
+   * Delete an event.
+   * CalendarService will handle clearing the state after deletion.
+   */
   deleteEvent: (id: string) => Promise<void>;
 }
 ```
@@ -311,8 +344,22 @@ class CalendarState extends AgentStateSlice {
   watch: CalendarWatchSchema | undefined; // Watch configuration
   processedEventIds: Set<string>;       // IDs of already processed events
   isWatching: boolean;                  // Whether watch is active
+
+  constructor(readonly initialConfig: CalendarAgentConfigSchema);
+  transferStateFromParent(parent: Agent): void;
+  serialize(): z.output<typeof serializationSchema>;
+  deserialize(data: z.output<typeof serializationSchema>): void;
+  show(): string;
 }
 ```
+
+**State Properties**:
+
+- `activeProvider`: Currently active calendar provider (from initial config or set via `setActiveProvider`)
+- `currentEvent`: Currently selected event for follow-up actions
+- `watch`: Watch configuration for automatic event processing
+- `processedEventIds`: Set of event IDs that have been processed by watches
+- `isWatching`: Flag indicating if background watch task is active
 
 **State Transitions**:
 
@@ -321,7 +368,8 @@ class CalendarState extends AgentStateSlice {
 - `selectEventById()` → sets `currentEvent` to selected event
 - `clearCurrentEvent()` → sets `currentEvent` to null
 - `deleteCurrentEvent()` → sets `currentEvent` to null after deletion
-- `watchCalendar()` → manages `isWatching` flag
+- `watchCalendar()` → sets `isWatching` to true, starts background task
+- `checkForNewEvents()` → adds new event IDs to `processedEventIds`
 
 ### RPC Endpoints
 
@@ -405,7 +453,7 @@ The package registers an RPC endpoint at `/rpc/calendar` with the following meth
   input: {
     id: string;
     provider: string;
-    updatedData: Partial<CalendarEvent>;
+    updatedData: Partial<Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">>;
   };
   result: {
     event: CalendarEvent;
@@ -514,7 +562,7 @@ calendarService.registerCalendarProvider("my-calendar", new MyCalendarProvider()
 #### Programmatic Usage
 
 ```typescript
-import { CalendarService } from "@tokenring-ai/calendar";
+import CalendarService from "@tokenring-ai/calendar/CalendarService";
 
 const calendarService = agent.requireServiceByType(CalendarService);
 
@@ -543,8 +591,20 @@ await calendarService.updateEvent({
   description: "Weekly status sync with roadmap review",
 }, agent);
 
+// Get the current event
+const currentEvent = calendarService.getCurrentEvent(agent);
+
+// Clear the current event
+calendarService.clearCurrentEvent(agent);
+
+// Delete the current event
+await calendarService.deleteCurrentEvent(agent);
+
 // Start watching for new events
 calendarService.watchCalendar(agent);
+
+// Set active provider
+calendarService.setActiveProvider("google-calendar", agent);
 ```
 
 #### Watch Configuration Example
@@ -687,8 +747,8 @@ const CalendarEventSchema = z.object({
   title: z.string(),                           // Event title
   description: z.string().exactOptional(),     // Event description
   location: z.string().exactOptional(),        // Event location
-  startAt: z.date(),                           // Event start time
-  endAt: z.date(),                             // Event end time
+  startAt: z.date(),                           // Event start time (Date object)
+  endAt: z.date(),                             // Event end time (Date object)
   allDay: z.boolean().exactOptional(),         // All-day flag
   attendees: z.array(                          // Event attendees
     z.object({
@@ -704,9 +764,52 @@ const CalendarEventSchema = z.object({
   ]).exactOptional(),
   url: z.string().exactOptional(),             // Event URL
   meetingUrl: z.string().exactOptional(),      // Meeting join URL
-  createdAt: z.number().exactOptional(),       // Creation timestamp
-  updatedAt: z.number().exactOptional(),       // Update timestamp
+  createdAt: z.number().exactOptional(),       // Creation timestamp (Unix ms)
+  updatedAt: z.number().exactOptional(),       // Update timestamp (Unix ms)
 });
+```
+
+#### CalendarAttendee Interface
+
+```typescript
+interface CalendarAttendee {
+  email: string;                               // Required email address
+  name?: string;                               // Optional display name
+  responseStatus?: "accepted" | "declined" | "tentative" | "needsAction";
+}
+```
+
+#### CalendarEventFilterOptions
+
+```typescript
+interface CalendarEventFilterOptions {
+  limit?: number;                              // Optional limit on results
+  from?: Date;                                 // Optional start time filter
+  to?: Date;                                   // Optional end time filter
+}
+```
+
+#### CalendarEventSearchOptions
+
+```typescript
+interface CalendarEventSearchOptions {
+  query: string;                               // Required search query
+  limit?: number;                              // Optional limit on results
+  from?: Date;                                 // Optional start time filter
+  to?: Date;                                   // Optional end time filter
+}
+```
+
+#### CreateCalendarEventData
+
+```typescript
+type CreateCalendarEventData = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
+```
+
+#### UpdateCalendarEventData
+
+```typescript
+type UpdateCalendarEventData = Partial<Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">>;
 ```
 
 ### Related Components

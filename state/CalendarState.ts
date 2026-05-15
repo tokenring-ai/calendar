@@ -1,5 +1,6 @@
 import type { Agent } from "@tokenring-ai/agent";
 import { AgentStateSlice } from "@tokenring-ai/agent/types";
+import deepClone from "@tokenring-ai/utility/object/deepClone";
 import markdownList from "@tokenring-ai/utility/string/markdownList";
 import { z } from "zod";
 import { type CalendarEvent, CalendarEventSchema } from "../CalendarProvider.ts";
@@ -25,7 +26,7 @@ export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
     super("CalendarState", serializationSchema);
     this.activeProvider = initialConfig.provider ?? null;
     this.currentEvent = null;
-    this.watch = initialConfig.watch;
+    this.watch = deepClone(initialConfig.watch);
     this.processedEventIds = new Set();
     this.isWatching = false;
   }
@@ -33,8 +34,8 @@ export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
   transferStateFromParent(parent: Agent): void {
     const parentState = parent.getState(CalendarState);
     this.activeProvider ??= parentState.activeProvider;
-    this.currentEvent ??= parentState.currentEvent;
-    this.watch ??= parentState.watch;
+    this.currentEvent ??= deepClone(parentState.currentEvent);
+    this.watch ??= deepClone(parentState.watch);
   }
 
   serialize(): z.output<typeof serializationSchema> {

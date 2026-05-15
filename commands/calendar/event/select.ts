@@ -34,7 +34,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
     const event = await calendarService.selectEventById(selection[0], agent);
     return `Selected event: "${event.title}"`;
   } catch (error: unknown) {
-    throw new CommandFailedError(`Error during event selection: ${error instanceof Error ? error.message : String(error)}`);
+    throw new CommandFailedError(`Error during event selection: ${Error.isError(error) ? error.message : String(error)}`);
   }
 }
 
