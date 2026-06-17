@@ -9,7 +9,7 @@ const displayName = "Calendar/getUpcomingEvents";
 const description = "Retrieve upcoming calendar events from the active provider";
 
 const inputSchema = z.object({
-  limit: z.number().int().positive().default(10).exactOptional(),
+  limit: z.number().int().positive().default(10),
   from: z.string().datetime().exactOptional().describe("Optional ISO date-time to start listing from"),
   to: z.string().datetime().exactOptional().describe("Optional ISO date-time upper bound"),
 });

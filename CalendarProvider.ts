@@ -11,8 +11,8 @@ export const CalendarEventSchema = z.object({
   title: z.string(),
   description: z.string().exactOptional(),
   location: z.string().exactOptional(),
-  startAt: z.date(),
-  endAt: z.date(),
+  startAt: z.coerce.date(),
+  endAt: z.coerce.date(),
   allDay: z.boolean().exactOptional(),
   attendees: z
     .array(
@@ -26,11 +26,12 @@ export const CalendarEventSchema = z.object({
   status: z.enum(["confirmed", "tentative", "cancelled"]).exactOptional(),
   url: z.string().exactOptional(),
   meetingUrl: z.string().exactOptional(),
-  createdAt: z.number().exactOptional(),
-  updatedAt: z.number().exactOptional(),
+  createdAt: z.coerce.date().exactOptional(),
+  updatedAt: z.coerce.date().exactOptional(),
 });
 
 export type CalendarEvent = z.input<typeof CalendarEventSchema>;
+export type ParsedCalendarEvent = z.output<typeof CalendarEventSchema>;
 
 export interface CalendarEventFilterOptions {
   limit?: number | undefined;
@@ -45,9 +46,9 @@ export interface CalendarEventSearchOptions {
   to?: Date | undefined;
 }
 
-export type CreateCalendarEventData = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
+export type CreateCalendarEventData = Omit<ParsedCalendarEvent, "id" | "createdAt" | "updatedAt">;
 
-export type UpdateCalendarEventData = Partial<Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">>;
+export type UpdateCalendarEventData = Partial<Omit<ParsedCalendarEvent, "id" | "createdAt" | "updatedAt">>;
 
 /**
  * CalendarProvider interface for calendar platform integrations.
@@ -67,31 +68,31 @@ export interface CalendarProvider {
    * Get upcoming calendar events.
    * @returns Array of events
    */
-  getUpcomingEvents(filter: CalendarEventFilterOptions): Promise<CalendarEvent[]>;
+  getUpcomingEvents(filter: CalendarEventFilterOptions): Promise<ParsedCalendarEvent[]>;
 
   /**
    * Search calendar events.
    * @returns Array of events
    */
-  searchEvents(filter: CalendarEventSearchOptions): Promise<CalendarEvent[]>;
+  searchEvents(filter: CalendarEventSearchOptions): Promise<ParsedCalendarEvent[]>;
 
   /**
    * Create a new calendar event.
    * @returns The created event
    */
-  createEvent(data: CreateCalendarEventData): Promise<CalendarEvent>;
+  createEvent(data: CreateCalendarEventData): Promise<ParsedCalendarEvent>;
 
   /**
    * Update an event.
    * @returns The updated event
    */
-  updateEvent(id: string, data: UpdateCalendarEventData): Promise<CalendarEvent>;
+  updateEvent(id: string, data: UpdateCalendarEventData): Promise<ParsedCalendarEvent>;
 
   /**
    * Get an event by ID.
    * @returns The selected event
    */
-  getEventById(id: string): Promise<CalendarEvent>;
+  getEventById(id: string): Promise<ParsedCalendarEvent>;
 
   /**
    * Delete an event.

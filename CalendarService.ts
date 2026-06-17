@@ -1,16 +1,16 @@
-import deepClone from "@tokenring-ai/utility/object/deepClone";
-import { setTimeout as delay } from "node:timers/promises";
 import type Agent from "@tokenring-ai/agent/Agent";
 import type { AgentCreationContext } from "@tokenring-ai/agent/types";
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import deepClone from "@tokenring-ai/utility/object/deepClone";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
+import { setTimeout as delay } from "node:timers/promises";
 import type { z } from "zod";
 import type {
-  CalendarEvent,
   CalendarEventFilterOptions,
   CalendarEventSearchOptions,
   CalendarProvider,
   CreateCalendarEventData,
+  ParsedCalendarEvent,
   UpdateCalendarEventData,
 } from "./CalendarProvider.ts";
 import { CalendarAgentConfigSchema, type CalendarConfigSchema, type CalendarWatchSchema } from "./schema.ts";
@@ -26,7 +26,8 @@ export default class CalendarService implements TokenRingService {
   getAvailableProviders = this.providers.keysArray;
   requireCalendarProvider = this.providers.require;
 
-  constructor(readonly options: z.output<typeof CalendarConfigSchema>) {}
+  constructor(readonly options: z.output<typeof CalendarConfigSchema>) {
+  }
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
     const agentConfig = deepClone(this.options.agentDefaults, agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema));
@@ -86,7 +87,7 @@ export default class CalendarService implements TokenRingService {
 
     // Filter for new events that haven't been processed
     const newEvents = agent.mutateState(CalendarState, state => {
-      const newEvents: CalendarEvent[] = [];
+      const newEvents: ParsedCalendarEvent[] = [];
       for (const event of events) {
         if (!state.processedEventIds.has(event.id)) {
           newEvents.push(event);
@@ -123,7 +124,7 @@ export default class CalendarService implements TokenRingService {
     }
   }
 
-  formatEventForPatternMatching(event: CalendarEvent): string {
+  formatEventForPatternMatching(event: ParsedCalendarEvent): string {
     const lines = [
       `Title: ${event.title}`,
       `Description: ${event.description ?? ""}`,
@@ -164,15 +165,15 @@ export default class CalendarService implements TokenRingService {
     });
   }
 
-  getUpcomingEvents(filter: CalendarEventFilterOptions, agent: Agent): Promise<CalendarEvent[]> {
+  getUpcomingEvents(filter: CalendarEventFilterOptions, agent: Agent): Promise<ParsedCalendarEvent[]> {
     return this.requireActiveCalendarProvider(agent).getUpcomingEvents(filter);
   }
 
-  searchEvents(filter: CalendarEventSearchOptions, agent: Agent): Promise<CalendarEvent[]> {
+  searchEvents(filter: CalendarEventSearchOptions, agent: Agent): Promise<ParsedCalendarEvent[]> {
     return this.requireActiveCalendarProvider(agent).searchEvents(filter);
   }
 
-  async createEvent(data: CreateCalendarEventData, agent: Agent): Promise<CalendarEvent> {
+  async createEvent(data: CreateCalendarEventData, agent: Agent): Promise<ParsedCalendarEvent> {
     const event = await this.requireActiveCalendarProvider(agent).createEvent(data);
     // Set the created event as current
     agent.mutateState(CalendarState, state => {
@@ -181,7 +182,7 @@ export default class CalendarService implements TokenRingService {
     return event;
   }
 
-  async updateEvent(data: UpdateCalendarEventData, agent: Agent): Promise<CalendarEvent> {
+  async updateEvent(data: UpdateCalendarEventData, agent: Agent): Promise<ParsedCalendarEvent> {
     const currentEvent = agent.getState(CalendarState).currentEvent;
     if (!currentEvent) throw new Error("No calendar event is currently selected");
 
@@ -189,7 +190,7 @@ export default class CalendarService implements TokenRingService {
       ...currentEvent,
       ...data,
     };
-    newEvent.updatedAt = Date.now();
+    newEvent.updatedAt = new Date();
 
     const event = await this.requireActiveCalendarProvider(agent).updateEvent(currentEvent.id, newEvent);
     // Update the current event in state
@@ -199,7 +200,7 @@ export default class CalendarService implements TokenRingService {
     return event;
   }
 
-  async selectEventById(id: string, agent: Agent): Promise<CalendarEvent> {
+  async selectEventById(id: string, agent: Agent): Promise<ParsedCalendarEvent> {
     const event = await this.requireActiveCalendarProvider(agent).getEventById(id);
     // Set the selected event as current
     agent.mutateState(CalendarState, state => {
@@ -208,7 +209,7 @@ export default class CalendarService implements TokenRingService {
     return event;
   }
 
-  getCurrentEvent(agent: Agent): CalendarEvent | null {
+  getCurrentEvent(agent: Agent): ParsedCalendarEvent | null {
     return agent.getState(CalendarState).currentEvent;
   }
 

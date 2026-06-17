@@ -10,7 +10,7 @@ const description = "Search calendar events using the active provider";
 
 const inputSchema = z.object({
   query: z.string().describe("Search query for calendar events"),
-  limit: z.number().int().positive().default(10).exactOptional(),
+  limit: z.number().int().positive().default(10),
   from: z.string().datetime().exactOptional(),
   to: z.string().datetime().exactOptional(),
 });

@@ -3,7 +3,7 @@ import { AgentStateSlice } from "@tokenring-ai/agent/types";
 import deepClone from "@tokenring-ai/utility/object/deepClone";
 import markdownList from "@tokenring-ai/utility/string/markdownList";
 import { z } from "zod";
-import { type CalendarEvent, CalendarEventSchema } from "../CalendarProvider.ts";
+import { CalendarEventSchema, type ParsedCalendarEvent } from "../CalendarProvider.ts";
 import { type CalendarAgentConfigSchema, CalendarWatchSchema } from "../schema.ts";
 
 const serializationSchema = z
@@ -17,7 +17,7 @@ const serializationSchema = z
 
 export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
   activeProvider: string | null;
-  currentEvent: CalendarEvent | null;
+  currentEvent: ParsedCalendarEvent | null;
   watch: z.output<typeof CalendarWatchSchema> | undefined;
   processedEventIds: Set<string>;
   isWatching: boolean;
