@@ -29,7 +29,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
       },
     });
 
-    if (!selection) return "Event selection cancelled.";
+    if (!selection?.[0]) return "Event selection cancelled.";
 
     const event = await calendarService.selectEventById(selection[0], agent);
     return `Selected event: "${event.title}"`;

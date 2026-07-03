@@ -1,4 +1,5 @@
-import { AgentNotFoundSchema } from "@tokenring-ai/agent/schema";
+import { AgentNotFoundSchema } from "@tokenring-ai/rpc/types";
+import { SuccessSchema } from "@tokenring-ai/rpc/types";
 import type { RPCSchema } from "@tokenring-ai/rpc/types";
 import { z } from "zod";
 import { CalendarEventSchema } from "../CalendarProvider.ts";
@@ -89,8 +90,7 @@ export default {
         agentId: z.string(),
       }),
       result: z.discriminatedUnion("status", [
-        z.object({
-          status: z.literal("success"),
+        SuccessSchema.extend({
           selectedEventId: z.string().nullable(),
           selectedProvider: z.string().nullable(),
           availableProviders: z.array(z.string()),
@@ -106,8 +106,7 @@ export default {
         selectedEventId: z.string().exactOptional(),
       }),
       result: z.discriminatedUnion("status", [
-        z.object({
-          status: z.literal("success"),
+        SuccessSchema.extend({
           selectedEventId: z.string().nullable(),
           selectedProvider: z.string().nullable(),
           availableProviders: z.array(z.string()),

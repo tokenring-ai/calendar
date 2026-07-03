@@ -26,8 +26,7 @@ export default class CalendarService implements TokenRingService {
   getAvailableProviders = this.providers.keysArray;
   requireCalendarProvider = this.providers.require;
 
-  constructor(readonly options: z.output<typeof CalendarConfigSchema>) {
-  }
+  constructor(readonly options: z.output<typeof CalendarConfigSchema>) {}
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
     const agentConfig = deepClone(this.options.agentDefaults, agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema));
