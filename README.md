@@ -3,9 +3,8 @@
 ## Overview
 
 `@tokenring-ai/calendar` provides an abstract calendar interface for Token Ring. It defines a provider-based
-architecture
-that enables agents to interact with calendar systems through tools, slash commands, RPC endpoints, and scripting
-functions.
+architecture that enables agents to interact with calendar systems through tools, slash commands, RPC endpoints,
+and scripting functions.
 
 Key capabilities:
 
@@ -57,6 +56,8 @@ app.usePlugin(CalendarPlugin, {
 
 ## Chat Commands
 
+The package provides slash commands for calendar operations. Commands are organized into two groups:
+
 ### Provider Commands
 
 | Command                         | Description                                    |
@@ -70,9 +71,9 @@ app.usePlugin(CalendarPlugin, {
 
 | Command                                          | Description                                        |
 | :----------------------------------------------- | :------------------------------------------------- |
-| `/calendar event list [limit]`                   | List upcoming events (default: 10)                 |
+| `/calendar event list [limit]`                   | List upcoming events (default: 10, range: 1-100)   |
 | `/calendar event search <query>`                 | Search events by query                             |
-| `/calendar event create` | Create a new event (see examples for syntax) |
+| `/calendar event create`                         | Create a new event (see examples for syntax)       |
 | `/calendar event get`                            | Display the currently selected event title         |
 | `/calendar event select`                         | Interactively select an upcoming event             |
 | `/calendar event info`                           | Show detailed information about the selected event |
@@ -90,7 +91,7 @@ app.usePlugin(CalendarPlugin, {
 /calendar event list
 /calendar event list 20
 /calendar event search standup
-/calendar event create "Team sync" | 2026-03-10T17:00:00.000Z | 2026-03-10T17:30:00.000Z | Weekly status sync
+/calendar event create "Team sync" | 2026-03-10T17:00:00.000Z | 2026-03-10T17:30:00.000Z | "Weekly status sync"
 /calendar event get
 /calendar event select
 /calendar event info
@@ -99,6 +100,8 @@ app.usePlugin(CalendarPlugin, {
 ```
 
 ## Tools
+
+The package provides the following tools for AI agent interaction:
 
 | Tool                          | Description                                 |
 |-------------------------------|---------------------------------------------|
@@ -120,31 +123,80 @@ app.usePlugin(CalendarPlugin, {
   to?: string;         // Optional ISO date-time end bound
 }
 
+// calendar_searchEvents
+{
+  query: string;       // Required search query
+  limit?: number;      // Optional limit (default: 10)
+  from?: string;       // Optional ISO date-time start bound
+  to?: string;         // Optional ISO date-time end bound
+}
+
+// calendar_selectEvent
+{
+  id: string;          // Unique identifier of the event to select
+}
+
+// calendar_getCurrentEvent
+{}
+
 // calendar_createEvent
 {
-  title: string;                       // Event title
-  startAt: string;                     // ISO format start time
-  endAt: string;                       // ISO format end time
+  title: string;                       // Event title (required)
+  startAt: string;                     // ISO format start time (required)
+  endAt: string;                       // ISO format end time (required)
   description?: string;                // Optional description
   location?: string;                   // Optional location
   allDay?: boolean;                    // Optional all-day flag
   attendees?: Array<{                  // Optional attendees
-    email: string;
-    name?: string;
+    email: string;                     // Valid email address (required, validated)
+    name?: string;                     // Optional display name
   }>;
 }
 
 // calendar_updateEvent
 {
-  title?: string;
-  startAt?: string;
-  endAt?: string;
-  description?: string;
-  location?: string;
-  allDay?: boolean;
-  attendees?: Array<{email: string; name?: string}>;
-  status?: "confirmed" | "tentative" | "cancelled";
+  title?: string;                      // Optional event title
+  startAt?: string;                    // Optional ISO format start time
+  endAt?: string;                      // Optional ISO format end time
+  description?: string;                // Optional description
+  location?: string;                   // Optional location
+  allDay?: boolean;                    // Optional all-day flag
+  attendees?: Array<{                  // Optional attendees
+    email: string;                     // Valid email address (required, validated)
+    name?: string;                     // Optional display name
+  }>;
+  status?: "confirmed" | "tentative" | "cancelled";  // Optional event status
 }
+
+// calendar_deleteCurrentEvent
+{}
+```
+
+## Scripting Functions
+
+The package registers the following scripting functions for programmatic access:
+
+| Function                          | Parameters                          | Description                        |
+| :-------------------------------- | :---------------------------------- | :--------------------------------- |
+| `getUpcomingCalendarEvents`       | `limit?`                            | Get upcoming events as JSON string |
+| `searchCalendarEvents`            | `query`, `limit?`                   | Search events by query             |
+| `createCalendarEvent`             | `title`, `startIso`, `endIso`, `description?` | Create a new event       |
+| `deleteCurrentCalendarEvent`      | (none)                              | Delete the currently selected event |
+
+### Scripting Examples
+
+```text
+# Get upcoming events
+getUpcomingCalendarEvents(5)
+
+# Search for events
+searchCalendarEvents("standup", 10)
+
+# Create an event
+createCalendarEvent("Team sync", "2026-03-10T17:00:00.000Z", "2026-03-10T17:30:00.000Z", "Weekly status sync")
+
+# Delete current event
+deleteCurrentCalendarEvent()
 ```
 
 ## Configuration
@@ -228,12 +280,12 @@ class CalendarService implements TokenRingService {
   requireCalendarProvider: (name: string) => CalendarProvider;
 
   // Event operations
-  getUpcomingEvents: (filter: CalendarEventFilterOptions, agent: Agent) => Promise<CalendarEvent[]>;
-  searchEvents: (filter: CalendarEventSearchOptions, agent: Agent) => Promise<CalendarEvent[]>;
-  createEvent: (data: CreateCalendarEventData, agent: Agent) => Promise<CalendarEvent>;
-  updateEvent: (data: UpdateCalendarEventData, agent: Agent) => Promise<CalendarEvent>;
-  selectEventById: (id: string, agent: Agent) => Promise<CalendarEvent>;
-  getCurrentEvent: (agent: Agent) => CalendarEvent | null;
+  getUpcomingEvents: (filter: CalendarEventFilterOptions, agent: Agent) => Promise<ParsedCalendarEvent[]>;
+  searchEvents: (filter: CalendarEventSearchOptions, agent: Agent) => Promise<ParsedCalendarEvent[]>;
+  createEvent: (data: CreateCalendarEventData, agent: Agent) => Promise<ParsedCalendarEvent>;
+  updateEvent: (data: UpdateCalendarEventData, agent: Agent) => Promise<ParsedCalendarEvent>;
+  selectEventById: (id: string, agent: Agent) => Promise<ParsedCalendarEvent>;
+  getCurrentEvent: (agent: Agent) => ParsedCalendarEvent | null;
   clearCurrentEvent: (agent: Agent) => void;
   deleteCurrentEvent: (agent: Agent) => Promise<void>;
 
@@ -243,9 +295,9 @@ class CalendarService implements TokenRingService {
   // Watch functionality
   watchCalendar: (agent: Agent) => void;
   checkForNewEvents: (watch: CalendarWatchSchema, agent: Agent) => Promise<void>;
-  
+
   // Utility methods
-  formatEventForPatternMatching: (event: CalendarEvent) => string;
+  formatEventForPatternMatching: (event: ParsedCalendarEvent) => string;
   requireActiveCalendarProvider: (agent: Agent) => CalendarProvider;
 }
 ```
@@ -265,31 +317,31 @@ interface CalendarProvider {
    * Get upcoming calendar events.
    * @returns Array of events
    */
-  getUpcomingEvents: (filter: CalendarEventFilterOptions) => Promise<CalendarEvent[]>;
+  getUpcomingEvents: (filter: CalendarEventFilterOptions) => Promise<ParsedCalendarEvent[]>;
 
   /**
    * Search calendar events.
    * @returns Array of events
    */
-  searchEvents: (filter: CalendarEventSearchOptions) => Promise<CalendarEvent[]>;
+  searchEvents: (filter: CalendarEventSearchOptions) => Promise<ParsedCalendarEvent[]>;
 
   /**
    * Create a new calendar event.
    * @returns The created event
    */
-  createEvent: (data: CreateCalendarEventData) => Promise<CalendarEvent>;
+  createEvent: (data: CreateCalendarEventData) => Promise<ParsedCalendarEvent>;
 
   /**
    * Update an event.
    * @returns The updated event
    */
-  updateEvent: (id: string, data: UpdateCalendarEventData) => Promise<CalendarEvent>;
+  updateEvent: (id: string, data: UpdateCalendarEventData) => Promise<ParsedCalendarEvent>;
 
   /**
    * Get an event by ID.
    * @returns The selected event
    */
-  getEventById: (id: string) => Promise<CalendarEvent>;
+  getEventById: (id: string) => Promise<ParsedCalendarEvent>;
 
   /**
    * Delete an event.
@@ -340,7 +392,7 @@ Manages all calendar-related agent state:
 ```typescript
 class CalendarState extends AgentStateSlice {
   activeProvider: string | null;        // Currently active provider
-  currentEvent: CalendarEvent | null;   // Currently selected event
+  currentEvent: ParsedCalendarEvent | null;  // Currently selected event
   watch: CalendarWatchSchema | undefined; // Watch configuration
   processedEventIds: Set<string>;       // IDs of already processed events
   isWatching: boolean;                  // Whether watch is active
@@ -363,13 +415,13 @@ class CalendarState extends AgentStateSlice {
 
 **State Transitions**:
 
-- `createEvent()` → sets `currentEvent` to created event
-- `updateEvent()` → updates `currentEvent` with modified data
-- `selectEventById()` → sets `currentEvent` to selected event
-- `clearCurrentEvent()` → sets `currentEvent` to null
-- `deleteCurrentEvent()` → sets `currentEvent` to null after deletion
-- `watchCalendar()` → sets `isWatching` to true, starts background task
-- `checkForNewEvents()` → adds new event IDs to `processedEventIds`
+- `createEvent()` -> sets `currentEvent` to created event
+- `updateEvent()` -> updates `currentEvent` with modified data
+- `selectEventById()` -> sets `currentEvent` to selected event
+- `clearCurrentEvent()` -> sets `currentEvent` to null
+- `deleteCurrentEvent()` -> sets `currentEvent` to null after deletion
+- `watchCalendar()` -> sets `isWatching` to true, starts background task
+- `checkForNewEvents()` -> adds new event IDs to `processedEventIds`
 
 ### RPC Endpoints
 
@@ -399,7 +451,7 @@ The package registers an RPC endpoint at `/rpc/calendar` with the following meth
     to?: string;    // ISO datetime
   };
   result: {
-    events: CalendarEvent[];
+    events: ParsedCalendarEvent[];
     count: number;
     message: string;
   };
@@ -417,7 +469,7 @@ The package registers an RPC endpoint at `/rpc/calendar` with the following meth
     limit?: number;
   };
   result: {
-    events: CalendarEvent[];
+    events: ParsedCalendarEvent[];
     count: number;
     message: string;
   };
@@ -439,7 +491,7 @@ The package registers an RPC endpoint at `/rpc/calendar` with the following meth
     allDay?: boolean;
   };
   result: {
-    event: CalendarEvent;
+    event: ParsedCalendarEvent;
     message: string;
   };
 }
@@ -453,10 +505,10 @@ The package registers an RPC endpoint at `/rpc/calendar` with the following meth
   input: {
     id: string;
     provider: string;
-    updatedData: Partial<Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">>;
+    updatedData: Partial<Omit<ParsedCalendarEvent, "id" | "createdAt" | "updatedAt">>;
   };
   result: {
-    event: CalendarEvent;
+    event: ParsedCalendarEvent;
     message: string;
   };
 }
@@ -699,6 +751,7 @@ pkg/calendar/
 │   ├── selectEvent.ts            # Select event tool
 │   └── updateEvent.ts            # Update event tool
 ├── commands.ts                   # Command registry
+├── vitest.config.ts              # Test configuration
 └── commands/
     └── calendar/
         ├── provider/
@@ -747,8 +800,8 @@ const CalendarEventSchema = z.object({
   title: z.string(),                           // Event title
   description: z.string().exactOptional(),     // Event description
   location: z.string().exactOptional(),        // Event location
-  startAt: z.date(),                           // Event start time (Date object)
-  endAt: z.date(),                             // Event end time (Date object)
+  startAt: z.coerce.date(),                    // Event start time (coerced to Date)
+  endAt: z.coerce.date(),                      // Event end time (coerced to Date)
   allDay: z.boolean().exactOptional(),         // All-day flag
   attendees: z.array(                          // Event attendees
     z.object({
@@ -764,10 +817,14 @@ const CalendarEventSchema = z.object({
   ]).exactOptional(),
   url: z.string().exactOptional(),             // Event URL
   meetingUrl: z.string().exactOptional(),      // Meeting join URL
-  createdAt: z.number().exactOptional(),       // Creation timestamp (Unix ms)
-  updatedAt: z.number().exactOptional(),       // Update timestamp (Unix ms)
+  createdAt: z.coerce.date().exactOptional(),  // Creation timestamp (coerced to Date)
+  updatedAt: z.coerce.date().exactOptional(),  // Update timestamp (coerced to Date)
 });
 ```
+
+**Note**: `CalendarEvent` is the input type (`z.input<typeof CalendarEventSchema>`) and
+`ParsedCalendarEvent` is the output type (`z.output<typeof CalendarEventSchema>`). The
+`z.coerce.date()` transforms string date inputs into `Date` objects.
 
 #### CalendarAttendee Interface
 
@@ -803,13 +860,13 @@ interface CalendarEventSearchOptions {
 #### CreateCalendarEventData
 
 ```typescript
-type CreateCalendarEventData = Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">;
+type CreateCalendarEventData = Omit<ParsedCalendarEvent, "id" | "createdAt" | "updatedAt">;
 ```
 
 #### UpdateCalendarEventData
 
 ```typescript
-type UpdateCalendarEventData = Partial<Omit<CalendarEvent, "id" | "createdAt" | "updatedAt">>;
+type UpdateCalendarEventData = Partial<Omit<ParsedCalendarEvent, "id" | "createdAt" | "updatedAt">>;
 ```
 
 ### Related Components
