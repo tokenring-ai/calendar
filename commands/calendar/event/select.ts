@@ -10,7 +10,7 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
 
   try {
     const events = await calendarService.getUpcomingEvents({ limit: 25 }, agent);
-    if (!events?.length) return "No events found.";
+    if (!events.length) return "No events found.";
 
     const tree: TreeLeaf[] = events.map(event => ({
       name: `${event.title} (${new Date(event.startAt).toLocaleString()})`,
@@ -33,8 +33,8 @@ async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Pr
 
     const event = await calendarService.selectEventById(selection[0], agent);
     return `Selected event: "${event.title}"`;
-  } catch (error: unknown) {
-    throw new CommandFailedError(`Error during event selection: ${Error.isError(error) ? error.message : String(error)}`);
+  } catch (err) {
+    throw new CommandFailedError(`Error during event selection`, { cause: err });
   }
 }
 

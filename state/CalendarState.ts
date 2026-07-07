@@ -1,6 +1,7 @@
 import type { Agent } from "@tokenring-ai/agent";
 import { AgentStateSlice } from "@tokenring-ai/agent/types";
 import deepClone from "@tokenring-ai/utility/object/deepClone";
+import isEmpty from "@tokenring-ai/utility/object/isEmpty";
 import markdownList from "@tokenring-ai/utility/string/markdownList";
 import { z } from "zod";
 import { CalendarEventSchema, type ParsedCalendarEvent } from "../CalendarProvider.ts";
@@ -56,9 +57,10 @@ export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
 
   show(): string {
     const watchLines =
-      this.watch && Object.keys(this.watch.actions ?? {}).length > 0
-        ? Object.entries(this.watch.actions).map(([key, value]) => `${key}: Pattern: ${value.pattern}, Command: ${value.command}`)
-        : ["No watches configured"];
+      this.watch && isEmpty(this.watch.actions)
+        ? ["No watches configured"]
+        : Object.entries(this.watch!.actions).map(([key, value]) => `${key}: Pattern: ${value.pattern}, Command: ${value.command}`);
+
     return `Active Calendar Provider: ${this.activeProvider}
 Current Event: ${this.currentEvent?.title ?? "None"}
 Watching: ${this.isWatching ? "Yes" : "No"}

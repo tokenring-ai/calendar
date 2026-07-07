@@ -1,9 +1,10 @@
+import { setTimeout as delay } from "node:timers/promises";
 import type Agent from "@tokenring-ai/agent/Agent";
 import type { AgentCreationContext } from "@tokenring-ai/agent/types";
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import { ConfigurationError } from "@tokenring-ai/app/types";
 import deepClone from "@tokenring-ai/utility/object/deepClone";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
-import { setTimeout as delay } from "node:timers/promises";
 import type { z } from "zod";
 import type {
   CalendarEventFilterOptions,
@@ -98,7 +99,7 @@ export default class CalendarService implements TokenRingService {
 
     // Process new events with configured actions
     for (const event of newEvents) {
-      if (!watch.actions || watch.actions.length === 0) continue;
+      if (watch.actions.length !== 0) continue;
 
       const eventText = this.formatEventForPatternMatching(event);
 
@@ -154,7 +155,7 @@ export default class CalendarService implements TokenRingService {
 
   requireActiveCalendarProvider(agent: Agent): CalendarProvider {
     const activeProvider = agent.getState(CalendarState).activeProvider;
-    if (!activeProvider) throw new Error("No calendar provider is currently selected");
+    if (!activeProvider) throw new ConfigurationError(this.name, "No calendar provider is currently selected");
     return this.providers.require(activeProvider);
   }
 
@@ -183,7 +184,7 @@ export default class CalendarService implements TokenRingService {
 
   async updateEvent(data: UpdateCalendarEventData, agent: Agent): Promise<ParsedCalendarEvent> {
     const currentEvent = agent.getState(CalendarState).currentEvent;
-    if (!currentEvent) throw new Error("No calendar event is currently selected");
+    if (!currentEvent) throw new ConfigurationError(this.name, "No calendar event is currently selected");
 
     const newEvent = {
       ...currentEvent,
@@ -220,7 +221,7 @@ export default class CalendarService implements TokenRingService {
 
   async deleteCurrentEvent(agent: Agent): Promise<void> {
     const currentEvent = this.getCurrentEvent(agent);
-    if (!currentEvent) throw new Error("No calendar event is currently selected");
+    if (!currentEvent) throw new ConfigurationError(this.name, "No calendar event is currently selected");
 
     await this.requireActiveCalendarProvider(agent).deleteEvent(currentEvent.id);
 
