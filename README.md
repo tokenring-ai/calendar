@@ -71,7 +71,7 @@ The package provides slash commands for calendar operations. Commands are organi
 
 | Command                                          | Description                                        |
 | :----------------------------------------------- | :------------------------------------------------- |
-| `/calendar event list [limit]`                   | List upcoming events (default: 10, range: 1-100)   |
+| `/calendar event list [<limit>]` | List upcoming events (default: 10, range: 1-100) |
 | `/calendar event search <query>`                 | Search events by query                             |
 | `/calendar event create`                         | Create a new event (see examples for syntax)       |
 | `/calendar event get`                            | Display the currently selected event title         |
@@ -91,7 +91,7 @@ The package provides slash commands for calendar operations. Commands are organi
 /calendar event list
 /calendar event list 20
 /calendar event search standup
-/calendar event create "Team sync" | 2026-03-10T17:00:00.000Z | 2026-03-10T17:30:00.000Z | "Weekly status sync"
+/calendar event create --title "Team sync" --start "2026-03-10T17:00:00.000Z" --end "2026-03-10T17:30:00.000Z" "Weekly status sync"
 /calendar event get
 /calendar event select
 /calendar event info
@@ -105,10 +105,10 @@ The package provides the following tools for AI agent interaction:
 
 | Tool                          | Description                                 |
 |-------------------------------|---------------------------------------------|
-| `calendar_getUpcomingEvents`  | Retrieve upcoming calendar events           |
-| `calendar_searchEvents`       | Search calendar events by query             |
-| `calendar_selectEvent`        | Select an event by ID for follow-up actions |
-| `calendar_getCurrentEvent`    | Get the currently selected event            |
+| `calendar_getUpcomingEvents` | Retrieve upcoming calendar events (returns a markdown table) |
+| `calendar_searchEvents` | Search calendar events by query (returns a markdown table) |
+| `calendar_selectEvent` | Select an event by ID for follow-up actions (returns formatted event details and JSON) |
+| `calendar_getCurrentEvent` | Get the currently selected event (returns JSON or "no event selected") |
 | `calendar_createEvent`        | Create a new calendar event                 |
 | `calendar_updateEvent`        | Update the currently selected event         |
 | `calendar_deleteCurrentEvent` | Delete the currently selected event         |
