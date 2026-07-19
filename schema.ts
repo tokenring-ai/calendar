@@ -3,7 +3,12 @@ import { z } from "zod";
 
 export const CalendarWatchSchema = z
   .object({
-    checkInterval: z.number().int().positive().default(300).meta({ unit: "s", advanced: true, description: "How often to check for new events" } satisfies ConfigFieldMeta),
+    checkInterval: z
+      .number()
+      .int()
+      .positive()
+      .default(300)
+      .meta({ unit: "s", advanced: true, description: "How often to check for new events" } satisfies ConfigFieldMeta),
     lookbackMinutes: z
       .number()
       .int()
