@@ -32,7 +32,10 @@ async function execute(input: z.output<typeof inputSchema>, agent: Agent): Promi
     agent,
   );
   agent.infoMessage(`[${name}] Event created with ID: ${event.id}`);
-  return JSON.stringify(event);
+  return {
+    message: `**Calendar** Created event ${event.title}`,
+    result: JSON.stringify(event),
+  };
 }
 
 export default {

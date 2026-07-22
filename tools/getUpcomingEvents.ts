@@ -24,14 +24,17 @@ async function execute({ limit, from, to }: z.output<typeof inputSchema>, agent:
     agent,
   );
 
-  return `
+  return {
+    message: `**Calendar** Listed ${events.length} upcoming events`,
+    result: `
 Upcoming events:
 
 ${markdownTable(
   ["ID", "Title", "Start", "End", "Location"],
   events.map(event => [event.id, event.title, event.startAt.toISOString(), event.endAt.toISOString(), event.location ?? ""]),
 )}
-  `.trim();
+  `.trim(),
+  };
 }
 
 export default {

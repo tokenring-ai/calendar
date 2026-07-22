@@ -26,14 +26,17 @@ async function execute({ query, limit, from, to }: z.output<typeof inputSchema>,
     agent,
   );
 
-  return `
+  return {
+    message: `**Calendar** Searched ${events.length} events`,
+    result: `
 Search results for "${query}":
 
 ${markdownTable(
   ["ID", "Title", "Start", "Status"],
   events.map(event => [event.id, event.title, event.startAt.toISOString(), event.status ?? ""]),
 )}
-  `.trim();
+  `.trim(),
+  };
 }
 
 export default {

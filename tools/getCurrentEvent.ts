@@ -11,7 +11,10 @@ const inputSchema = z.object({});
 
 function execute(_input: z.output<typeof inputSchema>, agent: Agent): TokenRingToolResult {
   const event = agent.requireServiceByType(CalendarService).getCurrentEvent(agent);
-  return event ? JSON.stringify(event) : "No calendar event is currently selected.";
+  return {
+    message: `**Calendar** Retrieved selected event`,
+    result: event ? JSON.stringify(event) : "No calendar event is currently selected.",
+  };
 }
 
 export default {

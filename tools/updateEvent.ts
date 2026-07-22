@@ -33,7 +33,10 @@ async function execute({ startAt, endAt, ...input }: z.output<typeof inputSchema
     agent,
   );
   agent.infoMessage(`[${name}] Event updated: ${event.id}`);
-  return JSON.stringify(event);
+  return {
+    message: "**Calendar** Updated event",
+    result: JSON.stringify(event),
+  };
 }
 
 export default {
