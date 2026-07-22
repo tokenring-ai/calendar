@@ -725,7 +725,7 @@ bun run test:coverage
 #### Dev Dependencies
 
 - `typescript` - TypeScript compiler
-- `vitest` - Testing framework
+- `bun test` - Testing framework
 
 ### Package Structure
 
@@ -751,7 +751,6 @@ pkg/calendar/
 │   ├── selectEvent.ts            # Select event tool
 │   └── updateEvent.ts            # Update event tool
 ├── commands.ts                   # Command registry
-├── vitest.config.ts              # Test configuration
 └── commands/
     └── calendar/
         ├── provider/
