@@ -91,5 +91,5 @@ export default {
       rpcService.registerEndpoint(calendarRPC);
     });
   },
-  config: packageConfigSchema,
+  configSchema: packageConfigSchema,
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
