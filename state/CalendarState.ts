@@ -2,6 +2,7 @@ import type { Agent } from "@tokenring-ai/agent";
 import { AgentStateSlice } from "@tokenring-ai/agent/types";
 import deepClone from "@tokenring-ai/utility/object/deepClone";
 import isEmpty from "@tokenring-ai/utility/object/isEmpty";
+import EnhancedSet from "@tokenring-ai/utility/set/enhancedSet";
 import markdownList from "@tokenring-ai/utility/string/markdownList";
 import { z } from "zod";
 import { CalendarEventSchema, type ParsedCalendarEvent } from "../CalendarProvider.ts";
@@ -18,18 +19,15 @@ const serializationSchema = z
 
 export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
   activeProvider: string | null;
-  currentEvent: ParsedCalendarEvent | null;
+  currentEvent: ParsedCalendarEvent | null = null;
   watch: z.output<typeof CalendarWatchSchema> | undefined;
-  processedEventIds: Set<string>;
-  isWatching: boolean;
+  processedEventIds = new EnhancedSet<string>();
+  isWatching: boolean = false;
 
   constructor(readonly initialConfig: z.output<typeof CalendarAgentConfigSchema>) {
     super("CalendarState", serializationSchema);
     this.activeProvider = initialConfig.provider ?? null;
-    this.currentEvent = null;
     this.watch = deepClone(initialConfig.watch);
-    this.processedEventIds = new Set();
-    this.isWatching = false;
   }
 
   transferStateFromParent(parent: Agent): void {
@@ -44,7 +42,7 @@ export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
       activeProvider: this.activeProvider,
       currentEvent: this.currentEvent,
       watch: this.watch,
-      processedEventIds: Array.from(this.processedEventIds),
+      processedEventIds: this.processedEventIds.valuesArray(),
     };
   }
 
@@ -52,14 +50,14 @@ export class CalendarState extends AgentStateSlice<typeof serializationSchema> {
     this.activeProvider = data.activeProvider;
     this.currentEvent = data.currentEvent ?? null;
     this.watch = data.watch;
-    this.processedEventIds = new Set(data.processedEventIds ?? []);
+    this.processedEventIds = new EnhancedSet(data.processedEventIds);
   }
 
   show(): string {
     const watchLines =
       this.watch && isEmpty(this.watch.actions)
         ? ["No watches configured"]
-        : Object.entries(this.watch!.actions).map(([key, value]) => `${key}: Pattern: ${value.pattern}, Command: ${value.command}`);
+        : this.watch!.actions.map(action => `Pattern: ${action.pattern}, Command: ${action.command}`);
 
     return `Active Calendar Provider: ${this.activeProvider}
 Current Event: ${this.currentEvent?.title ?? "None"}
