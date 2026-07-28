@@ -21,9 +21,8 @@ export default {
   displayName: "Calendar Service",
   version: packageJSON.version,
   description: packageJSON.description,
-  install(app, config) {
-    const service = new CalendarService(config.calendar);
-    app.services.register(service);
+  install(app) {
+    app.addServices(new CalendarService());
 
     app.services.waitForItemByType(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("getUpcomingCalendarEvents", {
@@ -90,6 +89,9 @@ export default {
     app.waitForService(RpcService, rpcService => {
       rpcService.registerEndpoint(calendarRPC);
     });
+  },
+  reconfigure(app, config) {
+    app.requireService(CalendarService).reconfigure(config.calendar);
   },
   configSchema: packageConfigSchema,
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;

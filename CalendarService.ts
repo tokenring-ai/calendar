@@ -14,8 +14,10 @@ import type {
   ParsedCalendarEvent,
   UpdateCalendarEventData,
 } from "./CalendarProvider.ts";
-import { CalendarAgentConfigSchema, type CalendarConfigSchema, type CalendarWatchSchema } from "./schema.ts";
+import { CalendarAgentConfigSchema, CalendarConfigSchema, type CalendarWatchSchema } from "./schema.ts";
 import { CalendarState } from "./state/CalendarState.ts";
+
+export type ParsedCalendarConfig = z.output<typeof CalendarConfigSchema>;
 
 export default class CalendarService implements TokenRingService {
   readonly name = "CalendarService";
@@ -27,7 +29,15 @@ export default class CalendarService implements TokenRingService {
   getAvailableProviders = this.providers.keysArray;
   requireCalendarProvider = this.providers.require;
 
-  constructor(readonly options: z.output<typeof CalendarConfigSchema>) {}
+  private options: ParsedCalendarConfig = CalendarConfigSchema.parse({});
+
+  constructor(options?: ParsedCalendarConfig) {
+    if (options) this.options = options;
+  }
+
+  reconfigure(options: ParsedCalendarConfig): void {
+    this.options = options;
+  }
 
   attach(agent: Agent, creationContext: AgentCreationContext): void {
     const agentConfig = deepClone(this.options.agentDefaults, agent.getAgentConfigSlice("calendar", CalendarAgentConfigSchema));
