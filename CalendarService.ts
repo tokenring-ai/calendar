@@ -26,6 +26,7 @@ export default class CalendarService implements TokenRingService {
   private providers = new KeyedRegistry<CalendarProvider>();
 
   registerCalendarProvider = this.providers.set;
+  unregisterCalendarProvider = this.providers.unregister;
   getAvailableProviders = this.providers.keysArray;
   requireCalendarProvider = this.providers.require;
 
