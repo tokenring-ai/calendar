@@ -24,7 +24,7 @@ const inputSchema = z.object({
 });
 
 async function execute({ startAt, endAt, ...input }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
-  const event = await agent.requireServiceByType(CalendarService).updateEvent(
+  const event = await agent.requireService(CalendarService).updateEvent(
     {
       ...input,
       ...(startAt && { startAt: new Date(startAt) }),

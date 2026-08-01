@@ -12,7 +12,7 @@ const inputSchema = z.object({
 });
 
 async function execute({ id }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
-  const event = await agent.requireServiceByType(CalendarService).selectEventById(id, agent);
+  const event = await agent.requireService(CalendarService).selectEventById(id, agent);
   return {
     message: `**Calendar** Selected event ${event.title}`,
     result: `

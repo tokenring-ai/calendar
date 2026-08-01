@@ -5,7 +5,7 @@ import { CalendarState } from "../../../state/CalendarState.ts";
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 function execute({ agent }: AgentCommandInputType<typeof inputSchema>): string {
-  const calendarService = agent.requireServiceByType(CalendarService);
+  const calendarService = agent.requireService(CalendarService);
   const currentEvent = calendarService.getCurrentEvent(agent);
   if (!currentEvent) return "No calendar event is currently selected.\nUse /calendar event select to choose an event.";
 

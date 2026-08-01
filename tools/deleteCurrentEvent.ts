@@ -10,7 +10,7 @@ const description = "Delete the currently selected calendar event";
 const inputSchema = z.object({});
 
 async function execute(_input: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {
-  await agent.requireServiceByType(CalendarService).deleteCurrentEvent(agent);
+  await agent.requireService(CalendarService).deleteCurrentEvent(agent);
   return {
     message: "**Calendar** Deleted selected event",
     result: "Deleted current calendar event.",

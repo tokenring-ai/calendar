@@ -18,7 +18,7 @@ const inputSchema = {
 async function execute({ args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const limit = args.limit;
 
-  const events = await agent.requireServiceByType(CalendarService).getUpcomingEvents({ limit }, agent);
+  const events = await agent.requireService(CalendarService).getUpcomingEvents({ limit }, agent);
   return `
 Upcoming events:
 

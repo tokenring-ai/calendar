@@ -13,8 +13,8 @@ const inputSchema = {
   ],
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({ positionals: { query }, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const events = await agent.requireServiceByType(CalendarService).searchEvents({ query }, agent);
+async function execute({ args: { query }, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+  const events = await agent.requireService(CalendarService).searchEvents({ query }, agent);
   return `
 Search results for "${query}":
 

@@ -6,7 +6,7 @@ import { CalendarState } from "../../../state/CalendarState.ts";
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  const calendarService = agent.requireServiceByType(CalendarService);
+  const calendarService = agent.requireService(CalendarService);
   const available = calendarService.getAvailableProviders();
   if (available.length === 0) return "No calendar providers are registered.";
   if (available.length === 1 && available[0]) {

@@ -12,8 +12,8 @@ const inputSchema = {
   ],
 } as const satisfies AgentCommandInputSchema;
 
-function execute({ positionals: { providerName }, agent }: AgentCommandInputType<typeof inputSchema>): string {
-  const calendarService = agent.requireServiceByType(CalendarService);
+function execute({ args: { providerName }, agent }: AgentCommandInputType<typeof inputSchema>): string {
+  const calendarService = agent.requireService(CalendarService);
 
   const available = calendarService.getAvailableProviders();
   if (available.includes(providerName)) {

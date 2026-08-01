@@ -4,7 +4,7 @@ import CalendarService from "../../../CalendarService.ts";
 const inputSchema = {} as const satisfies AgentCommandInputSchema;
 
 async function execute({ agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
-  await agent.requireServiceByType(CalendarService).deleteCurrentEvent(agent);
+  await agent.requireService(CalendarService).deleteCurrentEvent(agent);
   return "Deleted current calendar event.";
 }
 

@@ -607,7 +607,7 @@ class MyCalendarProvider implements CalendarProvider {
 }
 
 // Register with the service
-const calendarService = agent.requireServiceByType(CalendarService);
+const calendarService = agent.requireService(CalendarService);
 calendarService.registerCalendarProvider("my-calendar", new MyCalendarProvider());
 ```
 
@@ -616,7 +616,7 @@ calendarService.registerCalendarProvider("my-calendar", new MyCalendarProvider()
 ```typescript
 import CalendarService from "@tokenring-ai/calendar/CalendarService";
 
-const calendarService = agent.requireServiceByType(CalendarService);
+const calendarService = agent.requireService(CalendarService);
 
 // Get upcoming events
 const upcoming = await calendarService.getUpcomingEvents({ limit: 10 }, agent);

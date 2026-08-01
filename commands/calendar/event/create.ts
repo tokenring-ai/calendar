@@ -28,13 +28,13 @@ const inputSchema = {
   ],
 } as const satisfies AgentCommandInputSchema;
 
-async function execute({ args, positionals, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
+async function execute({ args, agent }: AgentCommandInputType<typeof inputSchema>): Promise<string> {
   const title = args.title;
   const startAt = args.start;
   const endAt = args.end;
-  const description = positionals.description;
+  const description = args.description;
 
-  const event = await agent.requireServiceByType(CalendarService).createEvent(
+  const event = await agent.requireService(CalendarService).createEvent(
     {
       title,
       startAt: new Date(startAt),

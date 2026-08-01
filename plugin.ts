@@ -22,7 +22,7 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app) {
-    app.addServices(new CalendarService());
+    app.addService(new CalendarService());
 
     app.services.waitForItemByType(ScriptingService, (scriptingService: ScriptingService) => {
       scriptingService.registerFunction("getUpcomingCalendarEvents", {
@@ -30,7 +30,7 @@ export default {
         params: ["limit"],
         async execute(this: ScriptingThis, limit?: string): Promise<string> {
           const parsedLimit = limit ? Number.parseInt(limit, 10) : undefined;
-          const events = await this.agent.requireServiceByType(CalendarService).getUpcomingEvents(
+          const events = await this.agent.requireService(CalendarService).getUpcomingEvents(
             {
               limit: Number.isFinite(parsedLimit) ? parsedLimit : undefined,
             },
@@ -45,7 +45,7 @@ export default {
         params: ["query", "limit"],
         async execute(this: ScriptingThis, query: string, limit?: string): Promise<string> {
           const parsedLimit = limit ? Number.parseInt(limit, 10) : undefined;
-          const events = await this.agent.requireServiceByType(CalendarService).searchEvents(
+          const events = await this.agent.requireService(CalendarService).searchEvents(
             {
               query,
               limit: Number.isFinite(parsedLimit) ? parsedLimit : undefined,
@@ -60,7 +60,7 @@ export default {
         type: "native",
         params: ["title", "startIso", "endIso", "description"],
         async execute(this: ScriptingThis, title: string, startIso: string, endIso: string, description?: string): Promise<string> {
-          const event = await this.agent.requireServiceByType(CalendarService).createEvent(
+          const event = await this.agent.requireService(CalendarService).createEvent(
             {
               title,
               startAt: new Date(startIso),
@@ -77,13 +77,13 @@ export default {
         type: "native",
         params: [],
         async execute(this: ScriptingThis): Promise<string> {
-          await this.agent.requireServiceByType(CalendarService).deleteCurrentEvent(this.agent);
+          await this.agent.requireService(CalendarService).deleteCurrentEvent(this.agent);
           return "Deleted current calendar event";
         },
       });
     });
 
-    app.waitForService(ChatService, chatService => chatService.addTools(...tools));
+    app.waitForService(ChatService, chatService => chatService.addTools(tools));
     app.waitForService(AgentCommandService, commandService => commandService.addAgentCommands(commands));
 
     app.waitForService(RpcService, rpcService => {
