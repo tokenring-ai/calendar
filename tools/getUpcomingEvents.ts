@@ -10,8 +10,8 @@ const description = "Retrieve upcoming calendar events from the active provider"
 
 const inputSchema = z.object({
   limit: z.number().int().positive().default(10),
-  from: z.string().datetime().exactOptional().describe("Optional ISO date-time to start listing from"),
-  to: z.string().datetime().exactOptional().describe("Optional ISO date-time upper bound"),
+  from: z.iso.datetime().exactOptional().describe("Optional ISO date-time to start listing from"),
+  to: z.iso.datetime().exactOptional().describe("Optional ISO date-time upper bound"),
 });
 
 async function execute({ limit, from, to }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {

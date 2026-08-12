@@ -8,14 +8,14 @@ const displayName = "Calendar/createEvent";
 const description = "Create a new calendar event";
 
 const attendeeSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   name: z.string().exactOptional(),
 });
 
 const inputSchema = z.object({
   title: z.string().describe("Event title"),
-  startAt: z.string().datetime().describe("Event start time in ISO format"),
-  endAt: z.string().datetime().describe("Event end time in ISO format"),
+  startAt: z.iso.datetime().describe("Event start time in ISO format"),
+  endAt: z.iso.datetime().describe("Event end time in ISO format"),
   description: z.string().exactOptional(),
   location: z.string().exactOptional(),
   allDay: z.boolean().exactOptional(),

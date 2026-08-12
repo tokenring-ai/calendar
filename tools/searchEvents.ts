@@ -11,8 +11,8 @@ const description = "Search calendar events using the active provider";
 const inputSchema = z.object({
   query: z.string().describe("Search query for calendar events"),
   limit: z.number().int().positive().default(10),
-  from: z.string().datetime().exactOptional(),
-  to: z.string().datetime().exactOptional(),
+  from: z.iso.datetime().exactOptional(),
+  to: z.iso.datetime().exactOptional(),
 });
 
 async function execute({ query, limit, from, to }: z.output<typeof inputSchema>, agent: Agent): Promise<TokenRingToolResult> {

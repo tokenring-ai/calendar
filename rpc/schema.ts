@@ -19,8 +19,8 @@ export default {
       input: z.object({
         provider: z.string(),
         limit: z.number().int().positive().exactOptional(),
-        from: z.string().datetime().exactOptional(),
-        to: z.string().datetime().exactOptional(),
+        from: z.iso.datetime().exactOptional(),
+        to: z.iso.datetime().exactOptional(),
       }),
       result: z.object({
         events: z.array(CalendarEventSchema),
@@ -46,8 +46,8 @@ export default {
       input: z.object({
         provider: z.string(),
         title: z.string(),
-        startAt: z.string().datetime(),
-        endAt: z.string().datetime(),
+        startAt: z.iso.datetime(),
+        endAt: z.iso.datetime(),
         description: z.string().exactOptional(),
         location: z.string().exactOptional(),
         allDay: z.boolean().exactOptional(),

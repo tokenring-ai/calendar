@@ -8,14 +8,14 @@ const displayName = "Calendar/updateEvent";
 const description = "Update the currently selected calendar event";
 
 const attendeeSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   name: z.string().exactOptional(),
 });
 
 const inputSchema = z.object({
   title: z.string().exactOptional(),
-  startAt: z.string().datetime().exactOptional(),
-  endAt: z.string().datetime().exactOptional(),
+  startAt: z.iso.datetime().exactOptional(),
+  endAt: z.iso.datetime().exactOptional(),
   description: z.string().exactOptional(),
   location: z.string().exactOptional(),
   allDay: z.boolean().exactOptional(),
